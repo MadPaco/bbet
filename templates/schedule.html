@@ -1,0 +1,37 @@
+<!-- schedule_template.html -->
+{% extends 'base.html' %}
+{% block content %}
+<html>
+<head>
+    <title>NFL Schedule</title>
+ 
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h1>NFL Schedule 2023</h1>
+                <table class="table">
+                    <tr style="background-color: white;">
+                        <th>Week</th>
+                        <th>Date</th>
+                        <th>Home Team</th>
+                        <th>Away Team</th>
+                        <th>Location</th>
+                    </tr>
+                    {% for game in schedule_data %}
+                    <tr>
+                        <td>{{ game.week_number }}</td>
+                        <td>{{ game.date }}</td>
+                        <td>{{ game.home_team }}</td>
+                        <td>{{ game.away_team }}</td>
+                        <td>{{ game.location }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+{% endblock content %}
