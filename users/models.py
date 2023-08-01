@@ -17,3 +17,9 @@ class Schedule(models.Model):
 
     def __str__(self):
         return f"Week {self.week_number}: {self.away_team} at {self.home_team}"
+
+class Bet(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    match = models.ForeignKey(Schedule, on_delete=models.CASCADE)
+    home_team_score = models.IntegerField()
+    away_team_score = models.IntegerField()

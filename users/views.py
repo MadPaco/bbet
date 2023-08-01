@@ -1,8 +1,8 @@
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, TemplateView, ListView
+from django.views.generic import CreateView, TemplateView, ListView, FormView
 from django.db.models import Q
-from .forms import CustomUserCreationForm
-from .models import Schedule
+from .forms import CustomUserCreationForm, BetForm
+from .models import Schedule, Bet
 
 class HomePageView(TemplateView):
     template_name = 'home.html'
@@ -42,3 +42,40 @@ class ScheduleView(ListView):
         # Assign the sorted list to 'team_names' in the context
         context['team_names'] = unique_teams_list
         return context
+    
+class BetView(FormView):
+    template_name = 'bet_form.html'
+    form_class = BetForm
+    success_url = reverse_lazy('schedule')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        kwargs['match'] = Schedule.objects.get(pk=self.kwargs['pk'])
+        return kwargs
+
+    def form_valid(self, form):
+        match = Schedule.objects.get(pk=self.kwargs['pk'])
+        home_team_score = form.cleaned_data['home_team_score']
+        away_team_score = form.cleaned_data['away_team_score']
+        #points = calculate_points(match, home_team_score, away_team_score)
+
+        bet = Bet(
+            user=self.request.user,
+            match=match,
+            home_team_score=home_team_score,
+            away_team_score=away_team_score,
+            #points=points,
+        )
+        bet.save()
+        return super().form_valid(form)
+
+    #def calculate_points(self, match, home_team_score, away_team_score):
+        # Implement your logic to calculate points based on predictions
+        # You can compare the predicted scores with the actual scores
+        # and assign points based on correctness.
+        # For example, you can assign points for correct result (win/draw/loss),
+        # partial points for correct tendency, and more.
+
+        # Return the calculated points here
+        #return calculated_points

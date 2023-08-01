@@ -19,29 +19,39 @@ label {
     color: white;
 }
 
-/* Style the table header */
+p {
+    color: white;
+}
+
+li {
+    color: white;
+}
+
 th {
     background-color: #f2f2f2;
     text-align: left;
     padding: 8px;
-    border: 1px solid #ddd; /* Add border to the header cells */
+    border: 1px solid #ddd; 
 }
 
-/* Style the table data cells */
 td {
     padding: 8px;
-    border-bottom: 1px solid #ddd; /* Add border to the bottom of data cells */
+    border-bottom: 1px solid #ddd; 
 }
 
 tr:nth-child(odd) td {
     padding: 8px;
-    background-color: #cacaca; /* Light grey background for odd rows */
-    border-bottom: 1px solid #ddd; /* Add border to the bottom of data cells */
+    background-color: #cacaca; 
+    border-bottom: 1px solid #ddd; 
 }
 
-/* Style the table data cells for even rows */
+
 tr:nth-child(even) td {
     padding: 8px;
-    background-color: #fff; /* White background for even rows */
-    border-bottom: 1px solid #ddd; /* Add border to the bottom of data cells */
+    background-color: #fff; 
+    border-bottom: 1px solid #ddd; 
+}
+
+#dropdownUser1 {
+    color: white;
 }
