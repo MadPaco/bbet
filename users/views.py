@@ -29,6 +29,16 @@ class ScheduleView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Fetch the list of all unique team names from the database
-        context['team_names'] = Schedule.objects.order_by().values_list('home_team', 'away_team').distinct()
+        # Fetch the list of all unique home teams and away teams from the database separately
+        home_teams = Schedule.objects.order_by().values_list('home_team', flat=True).distinct()
+        away_teams = Schedule.objects.order_by().values_list('away_team', flat=True).distinct()
+
+        # Combine the unique home teams and away teams and convert to a set to remove duplicates
+        unique_teams = set(list(home_teams) + list(away_teams))
+
+        # Convert the set back to a list and sort it alphabetically
+        unique_teams_list = sorted(list(unique_teams))
+
+        # Assign the sorted list to 'team_names' in the context
+        context['team_names'] = unique_teams_list
         return context

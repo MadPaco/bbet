@@ -15,6 +15,10 @@ h1 {
   color: white;
 }
 
+label {
+    color: white;
+}
+
 /* Style the table header */
 th {
     background-color: #f2f2f2;

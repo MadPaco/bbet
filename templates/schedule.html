@@ -16,7 +16,7 @@
                     <select name="team" id="team">
                         <option value="">All Teams</option>
                         {% for team_name in team_names %}
-                            <option value="{{ team_name.0 }}">{{ team_name.0 }}</option>
+                            <option value="{{ team_name }}">{{ team_name }}</option>
                         {% endfor %}
                     </select>
                     <!-- in case the browser blocks js -->
