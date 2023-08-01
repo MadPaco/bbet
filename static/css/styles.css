@@ -1,9 +1,10 @@
 body {
     background: linear-gradient(to bottom, #333, #000);
-    height: 100vh;
     background-repeat: no-repeat;
-    background-size: cover;
-}
+    background-size: auto 100%;
+    min-height: 100vh;
+  }
+  
 
 /* Style the table */
 table {

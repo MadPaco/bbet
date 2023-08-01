@@ -11,6 +11,19 @@
         <div class="row">
             <div class="col">
                 <h1>NFL Schedule 2023</h1>
+                <form id="teamForm" method="get">
+                    <label for="team">Select a team:</label>
+                    <select name="team" id="team">
+                        <option value="">All Teams</option>
+                        {% for team_name in team_names %}
+                            <option value="{{ team_name.0 }}">{{ team_name.0 }}</option>
+                        {% endfor %}
+                    </select>
+                    <!-- in case the browser blocks js -->
+                    <button type="submit" id="submitButton" style="display: none;">Show Matchups</button>
+                </form>
+                <br>
+                <h1>NFL Schedule 2023</h1>
                 <table class="table">
                     <tr style="background-color: white;">
                         <th>Week</th>
@@ -32,6 +45,21 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // JavaScript to auto-submit the form when a team is selected from the dropdown
+        const teamDropdown = document.getElementById('team');
+        const savedTeam = localStorage.getItem('selectedTeam');
+      
+        if (savedTeam) {
+          teamDropdown.value = savedTeam;
+        }
+      
+        teamDropdown.addEventListener('change', () => {
+          localStorage.setItem('selectedTeam', teamDropdown.value);
+          document.getElementById('teamForm').submit();
+        });
+      </script>
 </body>
 </html>
 {% endblock content %}
