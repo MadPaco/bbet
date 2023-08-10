@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Place Predictions{% endblock title %}
+{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Place Predictions</title>
+</head>
+<body>
+    <h1>Place Predictions</h1>
+
+    <form method="get">
+        <label for="week_number">Select Week:</label>
+        <select id="week_number" name="week_number">
+            {% for week in weeks %}
+                <option value="{{ week }}">Week {{ week }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Show Matches</button>
+    </form>
+
+    {% if week %}
+    { print(week) }
+        <h2>Week {{ week }} Matches</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ formset.management_form }}
+            <table> 
+                <thead>
+                    <tr>
+                        <th>Match</th>
+                        <th>Predicted Home Score</th>
+                        <th>Predicted Away Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for form in formset %}
+                        <tr>
+                            <td>{{ form.match }}</td>
+                            <td>{{ form.predicted_home_score }}</td>
+                            <td>{{ form.predicted_away_score }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <button type="submit">Place Predictions</button>
+        </form>
+    {% endif %}
+</body>
+</html>
+{% endblock content %}

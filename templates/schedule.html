@@ -19,8 +19,12 @@
                             <option value="{{ team_name }}">{{ team_name }}</option>
                         {% endfor %}
                     </select>
-                    <!-- in case the browser blocks js -->
-                    <button type="submit" id="submitButton" style="display: none;">Show Matchups</button>
+                    <select name="week" id="week">
+                        <option value="">All Weeks</option>
+                        {% for week in weeks %}
+                            <option value="{{ week }}">Week {{ week }}</option>
+                        {% endfor %}
+                    </select>
                 </form>
                 <br>
                 <table class="table">
@@ -49,15 +53,22 @@
         // JavaScript to auto-submit the form when a team is selected from the dropdown
         const teamDropdown = document.getElementById('team');
         const savedTeam = localStorage.getItem('selectedTeam');
+        const weekDropdown = document.getElementById('week');
+        const savedWeek = localStorage.getItem('selectedWeek');
       
-        if (savedTeam) {
-          teamDropdown.value = savedTeam;
-        }
+        teamDropdown.value = savedTeam ?? '';
+        weekDropdown.value = savedWeek ?? '';
       
         teamDropdown.addEventListener('change', () => {
-          localStorage.setItem('selectedTeam', teamDropdown.value);
-          document.getElementById('teamForm').submit();
+            localStorage.setItem('selectedTeam', teamDropdown.value);
+            document.getElementById('teamForm').submit();
         });
+
+        weekDropdown.addEventListener('change', () => {
+            localStorage.setItem('selectedWeek', weekDropdown.value);
+            document.getElementById('teamForm').submit();
+        });
+
       </script>
 </body>
 </html>

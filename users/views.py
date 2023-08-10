@@ -1,8 +1,10 @@
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, TemplateView, ListView, FormView
+from django.forms import formset_factory
+from django.views.generic import CreateView, TemplateView, ListView, FormView, View
 from django.db.models import Q
-from .forms import CustomUserCreationForm, BetForm
+from .forms import CustomUserCreationForm, PredictionForm, PredictionFormSet
 from .models import Schedule, Bet
+from django.shortcuts import render
 
 class HomePageView(TemplateView):
     template_name = 'home.html'
@@ -21,61 +23,81 @@ class ScheduleView(ListView):
 
     def get_queryset(self):
         selected_team = self.request.GET.get('team')
+        selected_week = self.request.GET.get('week')
         if selected_team:
             queryset = Schedule.objects.filter(Q(home_team=selected_team) | Q(away_team=selected_team))
+        elif selected_week:
+            queryset = Schedule.objects.filter(week_number=selected_week)
         else:
             queryset = Schedule.objects.all()
         return queryset.order_by('week_number')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Fetch the list of all unique home teams and away teams from the database separately
+        #first, create a list of all the unique team names
         home_teams = Schedule.objects.order_by().values_list('home_team', flat=True).distinct()
         away_teams = Schedule.objects.order_by().values_list('away_team', flat=True).distinct()
-
-        # Combine the unique home teams and away teams and convert to a set to remove duplicates
         unique_teams = set(list(home_teams) + list(away_teams))
-
-        # Convert the set back to a list and sort it alphabetically
         unique_teams_list = sorted(list(unique_teams))
-
-        # Assign the sorted list to 'team_names' in the context
         context['team_names'] = unique_teams_list
+        context['weeks'] = Schedule.objects.values_list('week_number', flat=True).distinct()
+        #now, create a list of all the matches per week
+        weeks = Schedule.objects.values_list('week_number', flat=True).distinct()
+        schedule = Schedule.objects.all()
+        matchups_per_week = []
+        for week in weeks:
+            matchups_per_week.append(schedule.filter(week_number=week))
+        
+        context['matchups_per_week'] = matchups_per_week
         return context
     
-class BetView(FormView):
-    template_name = 'bet_form.html'
-    form_class = BetForm
-    success_url = reverse_lazy('schedule')
+class PredictionsView(View):
+    template_name = 'predictions.html'
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
-        kwargs['match'] = Schedule.objects.get(pk=self.kwargs['pk'])
-        return kwargs
+    def get(self, request, *args, **kwargs):
+        weeks = Schedule.objects.values_list('week_number', flat=True).distinct()
+        selected_week = self.request.GET.get('week_number', 1)
+        print(selected_week)
+        if selected_week:
+            schedule = Schedule.objects.filter(week_number=selected_week)
+            formset = PredictionFormSet(selected_week=selected_week, queryset=Bet.objects.filter(match__week_number=selected_week))
+        else:
+            schedule = Schedule.objects.filter(week_number=1)
+            formset = PredictionFormSet(selected_week=1, queryset=Bet.objects.filter(match__week_number=1))
 
-    def form_valid(self, form):
-        match = Schedule.objects.get(pk=self.kwargs['pk'])
-        home_team_score = form.cleaned_data['home_team_score']
-        away_team_score = form.cleaned_data['away_team_score']
-        #points = calculate_points(match, home_team_score, away_team_score)
+        context = {
+            'weeks': weeks,
+            'selected_week': selected_week,
+            'schedule': schedule,
+            'formset': formset,
+        }
 
-        bet = Bet(
-            user=self.request.user,
-            match=match,
-            home_team_score=home_team_score,
-            away_team_score=away_team_score,
-            #points=points,
-        )
-        bet.save()
-        return super().form_valid(form)
-
-    #def calculate_points(self, match, home_team_score, away_team_score):
-        # Implement your logic to calculate points based on predictions
-        # You can compare the predicted scores with the actual scores
-        # and assign points based on correctness.
-        # For example, you can assign points for correct result (win/draw/loss),
-        # partial points for correct tendency, and more.
-
-        # Return the calculated points here
-        #return calculated_points
+        return render(request, self.template_name, context)
+    
+    def post(self, request, *args, **kwargs):
+        formset = self.formset_class(request.POST)
+        
+        if formset.is_valid():
+            selected_week = self.request.POST.get('week_number')
+            for form in formset:
+                if form.cleaned_data.get('match') and form.cleaned_data.get('predicted_home_score') and form.cleaned_data.get('predicted_away_score'):
+                    match = form.cleaned_data['match']
+                    Bet.objects.create(
+                        user=request.user,
+                        match=match,
+                        predicted_home_score=form.cleaned_data['predicted_home_score'],
+                        predicted_away_score=form.cleaned_data['predicted_away_score']
+                    )
+            
+            return redirect('predictions')
+        
+        weeks = Schedule.objects.values_list('week_number', flat=True).distinct()
+        schedule = Schedule.objects.filter(week_number=selected_week)
+        context = {
+            'weeks': weeks,
+            'selected_week': selected_week,
+            'schedule': schedule,
+            'formset': formset,
+        }
+        
+        return render(request, self.template_name, context)

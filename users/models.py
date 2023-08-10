@@ -21,5 +21,5 @@ class Schedule(models.Model):
 class Bet(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     match = models.ForeignKey(Schedule, on_delete=models.CASCADE)
-    home_team_score = models.IntegerField()
-    away_team_score = models.IntegerField()
+    predicted_home_score = models.PositiveIntegerField()
+    predicted_away_score = models.PositiveIntegerField()
