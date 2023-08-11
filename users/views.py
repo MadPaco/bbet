@@ -40,6 +40,7 @@ class ScheduleView(ListView):
         unique_teams = set(list(home_teams) + list(away_teams))
         unique_teams_list = sorted(list(unique_teams))
         context['team_names'] = unique_teams_list
+        context['selected_team'] = self.request.GET.get('team')
         context['weeks'] = Schedule.objects.values_list('week_number', flat=True).distinct()
         #now, create a list of all the matches per week
         weeks = Schedule.objects.values_list('week_number', flat=True).distinct()

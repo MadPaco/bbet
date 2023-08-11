@@ -39,6 +39,8 @@ td {
     border-bottom: 1px solid #ddd; 
 }
 
+
+
 tr:nth-child(odd) td {
     padding: 8px;
     background-color: #cacaca; 
@@ -54,4 +56,8 @@ tr:nth-child(even) td {
 
 #dropdownUser1 {
     color: white;
+}
+
+.selected {
+    color: red; /* Change this to your desired highlight color */
 }

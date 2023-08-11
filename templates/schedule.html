@@ -31,16 +31,16 @@
                     <tr style="background-color: white;">
                         <th>Week</th>
                         <th>Date</th>
-                        <th>Home Team</th>
                         <th>Away Team</th>
+                        <th>Home Team</th>
                         <th>Location</th>
                     </tr>
                     {% for game in schedule_data %}
                     <tr>
                         <td>{{ game.week_number }}</td>
                         <td>{{ game.date }}</td>
-                        <td>{{ game.home_team }}</td>
-                        <td>{{ game.away_team }}</td>
+                        <td {% if game.away_team == selected_team %} class = selected {% endif %}>{{ game.away_team }}</td>
+                        <td {% if game.home_team == selected_team %} class = selected {% endif %} >{{ game.home_team }}</td>
                         <td>{{ game.location }}</td>
                     </tr>
                     {% endfor %}
@@ -52,24 +52,44 @@
     <script>
         // JavaScript to auto-submit the form when a team is selected from the dropdown
         const teamDropdown = document.getElementById('team');
-        const savedTeam = localStorage.getItem('selectedTeam');
         const weekDropdown = document.getElementById('week');
+        const savedTeam = localStorage.getItem('selectedTeam');
         const savedWeek = localStorage.getItem('selectedWeek');
-      
+    
         teamDropdown.value = savedTeam ?? '';
         weekDropdown.value = savedWeek ?? '';
-      
+    
         teamDropdown.addEventListener('change', () => {
             localStorage.setItem('selectedTeam', teamDropdown.value);
             document.getElementById('teamForm').submit();
         });
-
+    
         weekDropdown.addEventListener('change', () => {
             localStorage.setItem('selectedWeek', weekDropdown.value);
             document.getElementById('teamForm').submit();
         });
-
-      </script>
+    
+        window.addEventListener('load', () => {
+            if (savedTeam) {
+                highlightSelectedTeam(savedTeam);
+            }
+        });
+    
+        function highlightSelectedTeam(selectedTeam) {
+            const tableRows = document.querySelectorAll('.table tr');
+            tableRows.forEach(row => {
+                const awayTeamCell = row.querySelector(`td[data-team="${selectedTeam}"][data-type="away"]`);
+                const homeTeamCell = row.querySelector(`td[data-team="${selectedTeam}"][data-type="home"]`);
+    
+                if (awayTeamCell) {
+                    awayTeamCell.classList.add('selected');
+                }
+                if (homeTeamCell) {
+                    homeTeamCell.classList.add('selected');
+                }
+            });
+        }
+    </script>
 </body>
 </html>
 {% endblock content %}
