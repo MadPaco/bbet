@@ -4,6 +4,8 @@
 {% block content %}
 {% if user.is_authenticated %}
     <p>Hi {{ user.username }}!</p>
+    <p> You can head over to <a href="{% url 'schedule' %}">Schedule</a> to check the schedule.</p>
+    <p> Go to <a href="{% url 'predictions' %}">Predictions</a> to place a bet</p>
     <p><a href="{% url 'logout' %}">Log Out</a></p>
 {% else %}
     <p>You are not logged in</p>
