@@ -24,12 +24,12 @@ class ScheduleView(ListView):
     def get_queryset(self):
         selected_team = self.request.GET.get('team')
         selected_week = self.request.GET.get('week')
+        queryset = Schedule.objects.all()
+
         if selected_team:
-            queryset = Schedule.objects.filter(Q(home_team=selected_team) | Q(away_team=selected_team))
-        elif selected_week:
-            queryset = Schedule.objects.filter(week_number=selected_week)
-        else:
-            queryset = Schedule.objects.all()
+            queryset = queryset.filter(Q(home_team=selected_team) | Q(away_team=selected_team))
+        if selected_week:
+            queryset = queryset.filter(week_number=selected_week)
         return queryset.order_by('week_number')
 
     def get_context_data(self, **kwargs):
