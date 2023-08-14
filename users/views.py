@@ -49,43 +49,18 @@ class PredictionsView(View):
     template_name = 'predictions.html'
 
     def get(self, request, *args, **kwargs):
-        selected_week = self.request.GET.get('week_number', 1)
-        if selected_week:
-            games = Bet.objects.filter(user=request.user, match__week_number=selected_week)
+        if self.request.GET.get('week_number', 1):
+            selected_week = self.request.GET.get('week_number', 1)
         else:
-            games = Bet.objects.filter(user=request.user, match__week_number=1)
-
+            selected_week = 1
+        
+        games = Bet.objects.filter(user=request.user, match__week_number=selected_week)
+        weeks = Schedule.objects.values_list('week_number', flat=True).distinct()
         context = {
             'selected_week': selected_week,
             'games': games,
+            'weeks': weeks,
         }
 
         return render(request, self.template_name, context)
     
-    def post(self, request, *args, **kwargs):
-        formset = self.formset_class(request.POST)
-        
-        if formset.is_valid():
-            selected_week = self.request.POST.get('week_number')
-            for form in formset:
-                if form.cleaned_data.get('match') and form.cleaned_data.get('predicted_home_score') and form.cleaned_data.get('predicted_away_score'):
-                    match = form.cleaned_data['match']
-                    Bet.objects.create(
-                        user=request.user,
-                        match=match,
-                        predicted_home_score=form.cleaned_data['predicted_home_score'],
-                        predicted_away_score=form.cleaned_data['predicted_away_score']
-                    )
-            
-            return redirect('predictions')
-        
-        weeks = Schedule.objects.values_list('week_number', flat=True).distinct()
-        schedule = Schedule.objects.filter(week_number=selected_week)
-        context = {
-            'weeks': weeks,
-            'selected_week': selected_week,
-            'schedule': schedule,
-            'formset': formset,
-        }
-        
-        return render(request, self.template_name, context)
