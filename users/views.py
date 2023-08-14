@@ -42,35 +42,22 @@ class ScheduleView(ListView):
         context['team_names'] = unique_teams_list
         context['selected_team'] = self.request.GET.get('team')
         context['weeks'] = Schedule.objects.values_list('week_number', flat=True).distinct()
-        #now, create a list of all the matches per week
-        weeks = Schedule.objects.values_list('week_number', flat=True).distinct()
-        schedule = Schedule.objects.all()
-        matchups_per_week = []
-        for week in weeks:
-            matchups_per_week.append(schedule.filter(week_number=week))
-        
-        context['matchups_per_week'] = matchups_per_week
+
         return context
     
 class PredictionsView(View):
     template_name = 'predictions.html'
 
     def get(self, request, *args, **kwargs):
-        weeks = Schedule.objects.values_list('week_number', flat=True).distinct()
         selected_week = self.request.GET.get('week_number', 1)
-        print(selected_week)
         if selected_week:
-            schedule = Schedule.objects.filter(week_number=selected_week)
-            formset = PredictionFormSet(selected_week=selected_week, queryset=Bet.objects.filter(match__week_number=selected_week))
+            games = Bet.objects.filter(user=request.user, match__week_number=selected_week)
         else:
-            schedule = Schedule.objects.filter(week_number=1)
-            formset = PredictionFormSet(selected_week=1, queryset=Bet.objects.filter(match__week_number=1))
+            games = Bet.objects.filter(user=request.user, match__week_number=1)
 
         context = {
-            'weeks': weeks,
             'selected_week': selected_week,
-            'schedule': schedule,
-            'formset': formset,
+            'games': games,
         }
 
         return render(request, self.template_name, context)
