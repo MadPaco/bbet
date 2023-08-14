@@ -64,3 +64,27 @@ class PredictionsView(View):
 
         return render(request, self.template_name, context)
     
+    def post(self, request, *args, **kwargs):
+        selected_week = request.POST.get('week_number', 1)
+        games = Bet.objects.filter(user=request.user, match__week_number=selected_week)
+        weeks = Schedule.objects.values_list('week_number', flat=True).distinct()
+        
+        for game in games:
+            home_score_key = f"predicted_home_score_{game.match.pk}"
+            away_score_key = f"predicted_away_score_{game.match.pk}"
+            
+            predicted_home_score = request.POST.get(home_score_key)
+            predicted_away_score = request.POST.get(away_score_key)
+            
+            if predicted_home_score is not None and predicted_away_score is not None:
+                game.predicted_home_score = int(predicted_home_score)
+                game.predicted_away_score = int(predicted_away_score)
+                game.save()
+
+        context = {
+            'selected_week': selected_week,
+            'games': games,
+            'weeks': weeks,
+        }
+
+        return render(request, self.template_name, context)
