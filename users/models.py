@@ -6,6 +6,9 @@ class CustomUser(AbstractUser):
     """ custom User class, adding an age field"""
     age = models.PositiveIntegerField(null=True, blank=True)
 
+    def __str__(self):
+        return self.username
+
 
 class Schedule(models.Model):
     match_number = models.PositiveIntegerField(primary_key=True)
@@ -25,3 +28,6 @@ class Bet(models.Model):
     match = models.ForeignKey(Schedule, on_delete=models.CASCADE)
     predicted_home_score = models.PositiveIntegerField()
     predicted_away_score = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f"{self.user.username} bet {self.predicted_home_score} - {self.predicted_away_score} on {self.match}"

@@ -38,10 +38,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    #local
+    # local
     'users.apps.UsersConfig',
 
-    #3rd party
+    # 3rd party
     'crispy_forms',
 ]
 
@@ -131,4 +131,3 @@ LOGOUT_REDIRECT_URL = 'home'
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-#08/09/2023 02:20

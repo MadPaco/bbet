@@ -10,10 +10,9 @@
                 <option value="{{ week }}" {% if week|default_if_none:1 == selected_week %}selected{% endif %}>Week {{ week }}</option>
             {% endfor %}
         </select>
-        <button type="submit">Apply</button>
     </form>
     
-    <form method="post">
+    <form method="post" id="PredictionsForm">
         {% csrf_token %}
         <table class="table">
             <thead>
@@ -36,10 +35,15 @@
         <button type="submit">Save Predictions</button>
     </form>
 </div>
-<scrip>
+<script>
     const weekDropdown = document.getElementById('week_number');
-    const savedWeek = localStorage.getItem('selectedWeek');
+    const savedWeek = localStorage.getItem('selectedWeekPredictions');
     weekDropdown.value = savedWeek ?? '';
+    window.addEventListener('change', () => {
+        localStorage.setItem('selectedWeekPredictions', weekDropdown.value);
+        document.getElementById('PredictionsForm').submit();
+    });
+    
 
-</scrip>
+</script>
 {% endblock content %}
