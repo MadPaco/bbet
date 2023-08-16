@@ -5,6 +5,7 @@ from users.models import Bet, Schedule
 
 User = get_user_model()
 
+
 @receiver(post_save, sender=User)
 def create_default_bets(sender, instance, created, **kwargs):
     if created:

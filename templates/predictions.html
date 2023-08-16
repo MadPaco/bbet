@@ -26,7 +26,7 @@
             <tbody>
                 {% for game in games %}
                     <tr>
-                        <td>{{ game.match }}</td>
+                        <td>{{ game.match.away_team }} at {{ game.match.home_team }}</td>
                         <td><input type="number" name="predicted_home_score_{{ game.match.pk }}" value="{{ game.predicted_home_score }}"></td>
                         <td><input type="number" name="predicted_away_score_{{ game.match.pk }}" value="{{ game.predicted_away_score }}"></td>
                     </tr>
@@ -36,4 +36,10 @@
         <button type="submit">Save Predictions</button>
     </form>
 </div>
+<scrip>
+    const weekDropdown = document.getElementById('week_number');
+    const savedWeek = localStorage.getItem('selectedWeek');
+    weekDropdown.value = savedWeek ?? '';
+
+</scrip>
 {% endblock content %}
