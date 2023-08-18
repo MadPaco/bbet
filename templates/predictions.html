@@ -7,7 +7,7 @@
         <label for="week_number">Select a week:</label>
         <select name="week_number" id="week_number">
             {% for week in weeks %}
-                <option value="{{ week }}" {% if week|default_if_none:1 == selected_week %}selected{% endif %}>Week {{ week }}</option>
+                <option value="{{ week }}" {% if week == selected_week|stringformat:"s" %}selected{% endif %}>Week {{ week }}</option>
             {% endfor %}
         </select>
     </form>
@@ -37,10 +37,10 @@
 </div>
 <script>
     const weekDropdown = document.getElementById('week_number');
-    const savedWeek = localStorage.getItem('selectedWeekPredictions');
-    weekDropdown.value = savedWeek ?? '';
-    window.addEventListener('change', () => {
-        localStorage.setItem('selectedWeekPredictions', weekDropdown.value);
+    weekDropdown.value = {{ selected_week }};
+
+    weekDropdown.addEventListener('change', () => {
+        document.cookie = 'selectedWeekPredictions=' + weekDropdown.value;
         document.getElementById('PredictionsForm').submit();
     });
     

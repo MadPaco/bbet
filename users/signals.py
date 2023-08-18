@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
-from users.models import Bet, Schedule
+from users.models import Bet, Match
 
 User = get_user_model()
 
@@ -10,7 +10,7 @@ User = get_user_model()
 def create_default_bets(sender, instance, created, **kwargs):
     if created:
         # Get all schedule matches
-        schedule_matches = Schedule.objects.all()
+        schedule_matches = Match.objects.all()
 
         # Create default bets for each match with initial scores as '0'
         for match in schedule_matches:

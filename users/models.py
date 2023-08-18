@@ -10,7 +10,7 @@ class CustomUser(AbstractUser):
         return self.username
 
 
-class Schedule(models.Model):
+class Match(models.Model):
     match_number = models.PositiveIntegerField(primary_key=True)
     week_number = models.PositiveIntegerField()
     date = models.DateTimeField()
@@ -25,7 +25,7 @@ class Schedule(models.Model):
 
 class Bet(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    match = models.ForeignKey(Schedule, on_delete=models.CASCADE)
+    match = models.ForeignKey(Match, on_delete=models.CASCADE)
     predicted_home_score = models.PositiveIntegerField()
     predicted_away_score = models.PositiveIntegerField()
 
