@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" id="dropdownUser1"
+  data-bs-toggle="dropdown" aria-expanded="false">
+  Choose week
+  </a>
+  <ul class="dropdown-menu text-small">
+    {% for week in weeks %}
+    <li><a class="dropdown-item" href="{% url 'enter_results' week %}">{{ week }}</a></li>
+    {% endfor %}
+  </ul>
+
+  <form method="post">
+    {% csrf_token %}
+    {% for match in matches %}
+      <h2>{{ match.away_team }} at {{ match.home_team }}</h2>
+      <label for="home_team_result_{{ match.id }}">Home Team Result:</label>
+      <input type="number" id="home_team_result_{{ match.id }}" name="home_team_result_{{ match.id }}" min="0">
+      <label for="away_team_result_{{ match.id }}">Away Team Result:</label>
+      <input type="number" id="away_team_result_{{ match.id }}" name="away_team_result_{{ match.id }}" min="0">
+    {% endfor %}
+    <button type="submit">Submit</button>
+  </form>
+{% endblock %}

@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-
+from users.views import EnterResultsView
 from django.contrib import admin
 from django.urls import path, include
 
@@ -23,5 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('users/', include('users.urls')),
     path('users/', include('django.contrib.auth.urls')),
+    path('users/matches/week/<int:week_number>/enter_results/', EnterResultsView.as_view(), name='enter_results'),
     path('', include('users.urls')),
 ]

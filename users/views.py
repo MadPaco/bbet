@@ -1,9 +1,10 @@
-from django.urls import reverse_lazy
-from django.views.generic import CreateView, TemplateView, ListView, View
+from django.urls import reverse_lazy, reverse
+from django.views.generic import CreateView, TemplateView, ListView, View, UpdateView
 from django.db.models import Q
 from .forms import CustomUserCreationForm
 from .models import Match, Bet
 from django.shortcuts import render
+from django.contrib.auth.mixins import UserPassesTestMixin
 
 
 class HomePageView(TemplateView):
@@ -88,3 +89,24 @@ class PredictionsView(View):
         }
 
         return render(request, self.template_name, context)
+
+class EnterResultsView(UserPassesTestMixin, ListView):
+    model = Match
+    template_name = 'enter_results.html'
+    context_object_name = 'matches'
+
+    def get_queryset(self):
+        week_number = self.kwargs.get('week_number')
+        return Match.objects.filter(week_number=week_number)
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['weeks'] = range(1, 19)
+        return context
+
+    def test_func(self):
+        return self.request.user.is_staff  # Only allow staff users to enter results
+    
+    def get_success_url(self):
+        week_number = self.kwargs.get('week_number')
+        return reverse('enter_results', kwargs={'week_number': week_number})
