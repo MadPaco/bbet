@@ -3,7 +3,7 @@ from django.views.generic import CreateView, TemplateView, ListView, View
 from django.db.models import Q
 from .forms import CustomUserCreationForm
 from .models import Match, Bet, CustomUser
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.contrib.auth.mixins import UserPassesTestMixin
 
 
@@ -111,6 +111,38 @@ class EnterResultsView(UserPassesTestMixin, ListView):
         week_number = self.kwargs.get('week_number')
         return reverse('enter_results', kwargs={'week_number': week_number})
     
+        
+    def post(self, request, *args, **kwargs):
+        week_number = self.kwargs.get('week_number')
+        matches = Match.objects.filter(week_number=week_number)
+
+        for match in matches:
+            home_score_key = f"home_team_result_{match.match_number}"
+            away_score_key = f"away_team_result_{match.match_number}"
+            home_score = request.POST.get(home_score_key)
+            away_score = request.POST.get(away_score_key)
+            print(away_score)
+            print(home_score)
+            if home_score is not None and away_score is not None:
+                match.home_team_result = int(home_score)
+                match.away_team_result = int(away_score)
+                match.save()
+
+                bets = Bet.objects.filter(match=match)
+                for bet in bets:
+                    points = 0
+                    if bet.predicted_home_score == match.home_team_result and bet.predicted_away_score == match.away_team_result:
+                        points = 5
+                    elif (bet.predicted_home_score - bet.predicted_away_score) == (match.home_team_result - match.away_team_result):
+                        points = 3
+                    elif (bet.predicted_home_score > bet.predicted_away_score and match.home_team_result > match.away_team_result) or \
+                         (bet.predicted_home_score < bet.predicted_away_score and match.home_team_result < match.away_team_result):
+                        points = 1
+                    bet.points = points
+                    bet.save()
+
+        return redirect(self.get_success_url())
+    
 class FellowBetsView(ListView):
     model = Bet
     template_name = 'fellow_bets.html'
@@ -128,4 +160,5 @@ class FellowBetsView(ListView):
         context['week_number'] = self.kwargs.get('week_number')
         
         return context
+
     
