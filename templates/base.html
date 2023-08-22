@@ -31,6 +31,7 @@
             <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser">
               <li><a class="dropdown-item" href="{% url 'schedule' %}">Schedule</a></li>
               <li><a class="dropdown-item" href="{% url 'predictions' %}">Predictions</a></li>
+              <li><a class="dropdown-item" href="{% url 'fellow_bets' week_number=1 %}">Others Bets</a></li>
               {% if request.user.is_staff %}
               <a href="{% url 'enter_results' week_number=1 %}">Enter Results</a>
               {% endif %}

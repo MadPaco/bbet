@@ -1,8 +1,8 @@
 from django.urls import reverse_lazy, reverse
-from django.views.generic import CreateView, TemplateView, ListView, View, UpdateView
+from django.views.generic import CreateView, TemplateView, ListView, View
 from django.db.models import Q
 from .forms import CustomUserCreationForm
-from .models import Match, Bet
+from .models import Match, Bet, CustomUser
 from django.shortcuts import render
 from django.contrib.auth.mixins import UserPassesTestMixin
 
@@ -110,3 +110,22 @@ class EnterResultsView(UserPassesTestMixin, ListView):
     def get_success_url(self):
         week_number = self.kwargs.get('week_number')
         return reverse('enter_results', kwargs={'week_number': week_number})
+    
+class FellowBetsView(ListView):
+    model = Bet
+    template_name = 'fellow_bets.html'
+    context_object_name = 'bets'
+
+    def get_queryset(self):
+        week_number = self.kwargs.get('week_number')
+        return Bet.objects.filter(match__week_number=week_number)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['weeks'] = range(1, 19)
+        context['matches'] = Match.objects.filter(week_number=self.kwargs.get('week_number'))
+        context['users'] = CustomUser.objects.all()
+        context['week_number'] = self.kwargs.get('week_number')
+        
+        return context
+    

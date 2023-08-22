@@ -23,6 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('users/', include('users.urls')),
     path('users/', include('django.contrib.auth.urls')),
-    path('users/matches/week/<int:week_number>/enter_results/', EnterResultsView.as_view(), name='enter_results'),
+    path('admin/enter_resuls/<int:week_number>/', EnterResultsView.as_view(), name='enter_results'),
     path('', include('users.urls')),
 ]

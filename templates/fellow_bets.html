@@ -1,5 +1,3 @@
-<!--this page allows the user to see the bets of other players-->
-
 {% extends 'base.html' %}
 
 {% block content %}
@@ -10,7 +8,46 @@
 <body>
     <div class="container">
         <div class="row">
-
+            <div class="col-md-12">
+                <h1>Others' Bets</h1>
+                <label for="week_number">Select Week:</label>
+                <select id="week_number" onchange="location = this.value;">
+                    {% for week in weeks %}
+                    <option value="{% url 'fellow_bets' week %}" {% if week == week_number %}selected{% endif %}>Week {{ week }}</option>
+                    {% endfor %}
+                </select>
+                <table class="table">
+                    <thead>
+                        <tr style=" background-color: white;">
+                            <th>Match</th>
+                            {% for user in users %}
+                            <th>{{ user.username }}'s Bet</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for match in matches %}
+                        <tr>
+                            <td>{{ match.away_team }} at {{ match.home_team }}</td>
+                            {% for user in users %}
+                            <td>
+                                {% for bet in bets %}
+                                {% if bet.user == user and bet.match == match %}
+                                {{ bet.predicted_away_score }} : {{ bet.predicted_home_score }}
+                                {% endif %}
+                                {% endfor %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="{{ users|length|add:1 }}">No matches for this week.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
-</body>   
+</body>
+{% endblock %}
