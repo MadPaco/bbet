@@ -10,7 +10,7 @@
         <div class="row">
             <div class="col-md-12">
                 <h1>Others' Bets</h1>
-                <label for="week_number">Select Week:</label>
+                <label for="week_number">Select Week:</label>z
                 <select id="week_number" onchange="location = this.value;">
                     {% for week in weeks %}
                     <option value="{% url 'fellow_bets' week %}" {% if week == week_number %}selected{% endif %}>Week {{ week }}</option>
@@ -18,10 +18,11 @@
                 </select>
                 <table class="table">
                     <thead>
-                        <tr style="background-color: white;">
+                        <tr style=" background-color: white;">
                             <th>Match</th>
                             {% for user in users %}
                             <th>{{ user.username }}'s Bet</th>
+                            <th>{{ user.username }}'s points</th>
                             {% endfor %}
                         </tr>
                     </thead>
@@ -32,12 +33,19 @@
                             {% for user in users %}
                             <td>
                                 {% for bet in bets %}
-                                {% if bet.user == user and bet.match == match %}
-                                {{ bet.predicted_away_score }} : {{ bet.predicted_home_score }}
-                                {% endif %}
+                                    {% if bet.user == user and bet.match == match %}
+                                        {{ bet.predicted_away_score }} : {{ bet.predicted_home_score }}
+                                    {% endif %}
                                 {% endfor %}
                             </td>
-                            {% endfor %}
+                            <td>
+                                {% for bet in bets %}
+                                    {% if bet.user == user and bet.match == match %}
+                                        {{bet.points}}
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
+                        {% endfor %}
                         </tr>
                         {% empty %}
                         <tr>

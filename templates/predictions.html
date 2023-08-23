@@ -26,8 +26,8 @@
                 {% for game in games %}
                     <tr>
                         <td>{{ game.match.away_team }} at {{ game.match.home_team }}</td>
-                        <td><input type="number" name="predicted_home_score_{{ game.match.pk }}" value="{{ game.predicted_home_score }}"></td>
-                        <td><input type="number" name="predicted_away_score_{{ game.match.pk }}" value="{{ game.predicted_away_score }}"></td>
+                        <td><input type="number" name="predicted_home_score_{{ game.match.pk }}" value="{{ game.predicted_home_score }}" {% if current_time > game.match.date %}disabled{% endif %}></td>
+                        <td><input type="number" name="predicted_away_score_{{ game.match.pk }}" value="{{ game.predicted_away_score }}" {% if current_time > game.match.date %}disabled{% endif %}></td>
                     </tr>
                 {% endfor %}
             </tbody>

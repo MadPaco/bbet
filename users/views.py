@@ -1,3 +1,4 @@
+from datetime import timedelta
 from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, TemplateView, ListView, View
 from django.db.models import Q
@@ -5,6 +6,7 @@ from .forms import CustomUserCreationForm
 from .models import Match, Bet, CustomUser
 from django.shortcuts import render, redirect
 from django.contrib.auth.mixins import UserPassesTestMixin
+from django.utils import timezone
 
 
 class HomePageView(TemplateView):
@@ -61,8 +63,8 @@ class PredictionsView(View):
             'selected_week': selected_week,
             'games': games,
             'weeks': weeks,
+            'current_time': timezone.now(),
         }
-
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
@@ -70,6 +72,7 @@ class PredictionsView(View):
         print(selected_week)
         games = Bet.objects.filter(user=request.user, match__week_number=selected_week)
         weeks = Match.objects.values_list('week_number', flat=True).distinct()
+        current_time = timezone.now()
 
         for game in games:
             home_score_key = f"predicted_home_score_{game.match.pk}"
@@ -86,6 +89,7 @@ class PredictionsView(View):
             'selected_week': selected_week,
             'games': games,
             'weeks': weeks,
+            'current_time': current_time,
         }
 
         return render(request, self.template_name, context)
