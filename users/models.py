@@ -10,14 +10,17 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return self.username
 
+class Team(models.Model):
+    name = models.CharField(max_length=100)
+    logo = models.ImageField(upload_to='team_logos/')
 
 class Match(models.Model):
     match_number = models.PositiveIntegerField(primary_key=True)
     week_number = models.PositiveIntegerField()
     date = models.DateTimeField()
     location = models.CharField(max_length=100)
-    home_team = models.CharField(max_length=50)
-    away_team = models.CharField(max_length=50)
+    home_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='home_matches')
+    away_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='away_matches')
     home_team_result = models.IntegerField(null=True, blank=True)
     away_team_result = models.IntegerField(null=True, blank=True)
 
