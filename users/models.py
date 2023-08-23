@@ -9,6 +9,13 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+    
+class Team(models.Model):
+    id = models.PositiveIntegerField(primary_key=True)
+    name = models.CharField(max_length=50)
+    logo = models.ImageField(upload_to='team_logos/', null=True, blank=True)
+    def __str__(self):
+        return self.name
 
 
 class Match(models.Model):
@@ -16,8 +23,8 @@ class Match(models.Model):
     week_number = models.PositiveIntegerField()
     date = models.DateTimeField()
     location = models.CharField(max_length=100)
-    home_team = models.CharField(max_length=50)
-    away_team = models.CharField(max_length=50)
+    home_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='home_team')
+    away_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='away_team')
     home_team_result = models.IntegerField(null=True, blank=True)
     away_team_result = models.IntegerField(null=True, blank=True)
 
