@@ -31,8 +31,10 @@
                     <tr style="background-color: white;">
                         <th>Week</th>
                         <th>Date</th>
+                        <th></th>
                         <th>Away Team</th>
                         <th>Home Team</th>
+                        <th></th>
                         <th>Location</th>
                     </tr>
                     {% for game in schedule_data %}
@@ -42,6 +44,7 @@
                         <td><img src="{{ game.away_team.logo.url }}" alt="{{ game.away_team.name }} Logo" style=" height: 100px; width: 100px;"></td>
                         <td {% if game.away_team == selected_team %} class = selected {% endif %}>{{ game.away_team }} </td>
                         <td {% if game.home_team == selected_team %} class = selected {% endif %} >{{ game.home_team }}</td>
+                        <td><img src="{{ game.home_team.logo.url }}" alt="{{ game.home_team.name }} Logo" style=" height: 100px; width: 100px;"></td>
                         <td>{{ game.location }}</td>
                     </tr>
                     {% endfor %}
