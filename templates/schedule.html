@@ -10,16 +10,15 @@
     <div class="container">
         <div class="row">
             <div class="col">
-                <h1>NFL Schedule 2023</h1>
-                <form id="teamForm" method="get">
-                    <label for="team">Select a team:</label>
-                    <select name="team" id="team">
+                <h1 class="schedule-h1">NFL Schedule 2023</h1>
+                <form id="teamForm" method="get" class="center-form">
+                    <select name="team" id="team" class="select">
                         <option value="">All Teams</option>
                         {% for team_name in team_names %}
                             <option value="{{ team_name }}">{{ team_name }}</option>
                         {% endfor %}
                     </select>
-                    <select name="week" id="week">
+                    <select name="week" id="week" class="select">
                         <option value="">All Weeks</option>
                         {% for week in weeks %}
                             <option value="{{ week }}">Week {{ week }}</option>
@@ -27,28 +26,25 @@
                     </select>
                 </form>
                 <br>
-                <table class="table">
-                    <tr style="background-color: white;">
-                        <th>Week</th>
-                        <th>Date</th>
-                        <th></th>
-                        <th>Away Team</th>
-                        <th>Home Team</th>
-                        <th></th>
-                        <th>Location</th>
-                    </tr>
+                <div class="match-container">
                     {% for game in schedule_data %}
-                    <tr>
-                        <td>{{ game.week_number }}</td>
-                        <td>{{ game.date }}</td>
-                        <td><img src="{{ game.away_team.logo.url }}" alt="{{ game.away_team.name }} Logo" style=" height: 100px; width: 100px;"></td>
-                        <td {% if game.away_team == selected_team %} class = selected {% endif %}>{{ game.away_team }} </td>
-                        <td {% if game.home_team == selected_team %} class = selected {% endif %} >{{ game.home_team }}</td>
-                        <td><img src="{{ game.home_team.logo.url }}" alt="{{ game.home_team.name }} Logo" style=" height: 100px; width: 100px;"></td>
-                        <td>{{ game.location }}</td>
-                    </tr>
+                    <div class="match-row">
+                        <div class="date row">{{ game.date }}</div>
+                        <div class="teams row">
+                            <div class="team away d-flex col">
+                                <div class="team-name">{{ game.away_team }}</div>
+                                <img src="{{ game.away_team.logo.url }}" alt="{{ game.away_team.name }} Logo" class="team-logo img-fluid">
+                            </div>
+                            <div class="at col-1">at</div>
+                            <div class="team home d-flex col">
+                                <img src="{{ game.home_team.logo.url }}" alt="{{ game.home_team.name }} Logo" class="team-logo img-fluid">
+                                <div class="team-name">{{ game.home_team }}</div>
+                            </div>
+                        </div>
+                        <div class="location row">{{ game.location }}</div>
+                    </div>
                     {% endfor %}
-                </table>
+                </div>
             </div>
         </div>
     </div>
