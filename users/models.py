@@ -15,6 +15,7 @@ class CustomUser(AbstractUser):
 class Team(models.Model):
     name = models.CharField(max_length=50, blank=True, primary_key=True)
     logo = models.ImageField(upload_to='team_logos/', null=True, blank=True)
+    short_name = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.name
