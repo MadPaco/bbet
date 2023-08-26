@@ -1,16 +1,16 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<html>
-<head>
-    <title>Others Bets</title>
-</head>
-<body>
-    <div class="container">
+<div class="container">
+    <html>
+    <head>
+        <title>Others Bets</title>
+    </head>
+    <body>
         <div class="row">
             <div class="col-md-12">
                 <h1>Others' Bets</h1>
-                <label for="week_number">Select Week:</label>z
+                <label for="week_number">Select Week:</label>
                 <select id="week_number" onchange="location = this.value;">
                     {% for week in weeks %}
                     <option value="{% url 'fellow_bets' week %}" {% if week == week_number %}selected{% endif %}>Week {{ week }}</option>
@@ -18,7 +18,7 @@
                 </select>
                 <table class="table">
                     <thead>
-                        <tr style=" background-color: white;">
+                        <tr style="background-color: white;">
                             <th>Match</th>
                             {% for user in users %}
                             <th>{{ user.username }}'s Bet</th>
@@ -41,11 +41,11 @@
                             <td>
                                 {% for bet in bets %}
                                     {% if bet.user == user and bet.match == match %}
-                                        {{bet.points}}
+                                        {{ bet.points }}
                                     {% endif %}
                                 {% endfor %}
                             </td>
-                        {% endfor %}
+                            {% endfor %}
                         </tr>
                         {% empty %}
                         <tr>
@@ -56,6 +56,7 @@
                 </table>
             </div>
         </div>
-    </div>
-</body>
+    </body>
+    </html>
+</div>
 {% endblock %}

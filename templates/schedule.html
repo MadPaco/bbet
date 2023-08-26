@@ -74,21 +74,6 @@
                 highlightSelectedTeam(savedTeam);
             }
         });
-    
-        function highlightSelectedTeam(selectedTeam) {
-            const tableRows = document.querySelectorAll('.table tr');
-            tableRows.forEach(row => {
-                const awayTeamCell = row.querySelector(`td[data-team="${selectedTeam}"][data-type="away"]`);
-                const homeTeamCell = row.querySelector(`td[data-team="${selectedTeam}"][data-type="home"]`);
-    
-                if (awayTeamCell) {
-                    awayTeamCell.classList.add('selected');
-                }
-                if (homeTeamCell) {
-                    homeTeamCell.classList.add('selected');
-                }
-            });
-        }
     </script>
 </body>
 </html>

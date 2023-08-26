@@ -40,7 +40,7 @@ INSTALLED_APPS = [
 
     # local
     'users.apps.UsersConfig',
-
+    
     # 3rd party
     'crispy_forms',
 ]
@@ -69,6 +69,9 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'libraries':{
+                'index': 'templatetags.index',
+            }
         },
     },
 ]

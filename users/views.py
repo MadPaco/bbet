@@ -68,8 +68,11 @@ class PredictionsView(View):
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
-        selected_week = request.COOKIES['selectedWeekPredictions']
-        print(selected_week)
+        try: 
+            selected_week = request.COOKIES['selectedWeekPredictions']
+        except KeyError:
+            selected_week = 1
+
         games = Bet.objects.filter(user=request.user, match__week_number=selected_week)
         weeks = Match.objects.values_list('week_number', flat=True).distinct()
         current_time = timezone.now()
@@ -123,11 +126,17 @@ class EnterResultsView(UserPassesTestMixin, ListView):
         for match in matches:
             home_score_key = f"home_team_result_{match.match_number}"
             away_score_key = f"away_team_result_{match.match_number}"
-            home_score = request.POST.get(home_score_key)
-            away_score = request.POST.get(away_score_key)
-            print(away_score)
-            print(home_score)
-            if home_score is not None and away_score is not None:
+
+            try:
+                home_score = request.POST.get(home_score_key)
+            except ValueError:
+                home_score = None
+            try:
+                away_score = request.POST.get(away_score_key)
+            except ValueError:
+                away_score = None
+            print(type(home_score))
+            if home_score is not None and len(home_score) > 0 and away_score is not None and len(away_score) > 0:
                 match.home_team_result = int(home_score)
                 match.away_team_result = int(away_score)
                 match.save()
@@ -163,6 +172,40 @@ class FellowBetsView(ListView):
         context['users'] = CustomUser.objects.all()
         context['week_number'] = self.kwargs.get('week_number')
         
+        return context
+    
+class StandingsView(ListView):
+    model = Bet
+    template_name = 'standings.html'
+    context_object_name = 'users'
+
+    def get_queryset(self):
+        return CustomUser.objects.all()
+
+    def get_context_data(self, **kwargs):
+        weeks = range(1, 19)
+        context = super().get_context_data(**kwargs)
+        context['weeks'] = weeks
+        users = CustomUser.objects.all()
+        context['users'] = users
+
+        standings = {}
+        grandTotal = {}
+
+        for user in users:
+            points = {}
+            for week in weeks:
+                weeklyPoints = 0
+                weeklyBets = Bet.objects.filter(match__week_number=week, user=user)
+                for bet in weeklyBets:
+                    weeklyPoints += bet.points
+                points[week] = weeklyPoints
+            standings[user] = points
+            grandTotal = {user.username: sum(points.values()) for user, points in standings.items()}
+
+        context['standings'] = standings
+        context['grandTotal'] = grandTotal
+
         return context
 
     

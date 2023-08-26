@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load index %}
+{% load static %}
+{% block content %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Standings</title>
+</head>
+<body>
+    <div class="container">
+    <h1 class="text-center">Standings</h1>
+        <div class="table-responsive">
+            <table class="table table-stri">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        {% for week in weeks %}
+                            <th>Week {{ week }}</th>
+                        {% endfor %}
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user, points in standings.items %}
+                        <tr>
+                            <td>{{ user.username }}</td>
+                            {% for week, week_points in points.items %}
+                                <td>{{ week_points }}</td>
+                            {% endfor %}
+                            <td>{{ grandTotal|index:user.username }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
+{% endblock content %}

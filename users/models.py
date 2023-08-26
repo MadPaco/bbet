@@ -6,7 +6,8 @@ from django.urls import reverse
 class CustomUser(AbstractUser):
     """ custom User class, adding an age field"""
     age = models.PositiveIntegerField(null=True, blank=True)
-
+    favorite_team = models.CharField(max_length=50, null=True, blank=True)
+    
 
     def __str__(self):
         return self.username
@@ -38,7 +39,7 @@ class Bet(models.Model):
     predicted_home_score = models.PositiveIntegerField()
     predicted_away_score = models.PositiveIntegerField()
     points = models.IntegerField(default=0)
-
+    
     def get_admin_url(self):
         return reverse("admin:%s_%s_change" % (self._meta.app_label, self._meta.model_name), args=(self.id,))
 

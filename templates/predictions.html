@@ -1,22 +1,24 @@
 <!-- predictions.html -->
 {% extends 'base.html' %}
 {% block content %}
-<div class="container">
+<div class="text-center">
     <h1>Predictions</h1>
-    <form method="get">
+    <form method="get" style="display: inline-block;">
         <label for="week_number">Select a week:</label>
         <select name="week_number" id="week_number">
             {% for week in weeks %}
-                <option value="{{ week }}" {% if week == selected_week|stringformat:"s" %}selected{% endif %}>Week {{ week }}</option>
+            <option value="{{ week }}" {% if week == selected_week|stringformat:"s" %}selected{% endif %}>Week {{ week }}</option>
             {% endfor %}
         </select>
     </form>
-    
-    <form method="post" id="PredictionsForm">
+</div>
+
+<div class="d-flex justify-content-center">
+    <form method="post" id="PredictionsForm" class="text-center d-flex justify-content-center">
         {% csrf_token %}
-        <table class="table">
+        <table class="table-responsive">
             <thead>
-                <tr style="background-color: white;"> 
+                <tr style="background-color: white;">
                     <th>Match</th>
                     <th>Predicted Home Score</th>
                     <th>Predicted Away Score</th>
@@ -24,15 +26,14 @@
             </thead>
             <tbody>
                 {% for game in games %}
-                    <tr>
-                        <td>{{ game.match.away_team }} at {{ game.match.home_team }}</td>
-                        <td><input type="number" name="predicted_home_score_{{ game.match.pk }}" value="{{ game.predicted_home_score }}" {% if current_time > game.match.date %}disabled{% endif %}></td>
-                        <td><input type="number" name="predicted_away_score_{{ game.match.pk }}" value="{{ game.predicted_away_score }}" {% if current_time > game.match.date %}disabled{% endif %}></td>
-                    </tr>
+                <tr>
+                    <td>{{ game.match.away_team }} at {{ game.match.home_team }}</td>
+                    <td><input class="form-control form-control-sm" type="number" name="predicted_home_score_{{ game.match.pk }}" value="{{ game.predicted_home_score }}" {% if current_time > game.match.date %}disabled{% endif %}></td>
+                    <td><input class="form-control form-control-sm" type="number" name="predicted_away_score_{{ game.match.pk }}" value="{{ game.predicted_away_score }}" {% if current_time > game.match.date %}disabled{% endif %}></td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
-        <button type="submit">Save Predictions</button>
     </form>
 </div>
 <script>
@@ -43,7 +44,5 @@
         document.cookie = 'selectedWeekPredictions=' + weekDropdown.value;
         document.getElementById('PredictionsForm').submit();
     });
-    
-
 </script>
 {% endblock content %}
