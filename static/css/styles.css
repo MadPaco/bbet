@@ -59,7 +59,7 @@ tr:nth-child(even) td {
     align-items: center;
   }
   
-.match-row {
+.glass {
 /* From https://css.glass */
 background: rgba(255, 255, 255, 0.18);
 border-radius: 16px;
@@ -67,7 +67,7 @@ box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 backdrop-filter: blur(4.7px);
 -webkit-backdrop-filter: blur(4.7px);
 border: 1px solid rgba(255, 255, 255, 0.51);
-width: 80%;
+width: 90%;
 margin-bottom: 20px;
 padding: auto;
 }
@@ -86,11 +86,11 @@ padding: auto;
 }
 
 .team-logo {
-width: 10vw;
-height: 10vw;
+    width: 5vw;    
+    height: 5vw;   
 }
 
-.team-name {
+.white-bold {
 font-size: 2vw;
 font-weight: bold;
 display: flex;
@@ -179,4 +179,27 @@ color: white;
     align-items: center;
     justify-content: center;
     text-align: center;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.score-input {
+    width: 5%;
+    text-align: center;
+    box-sizing: border-box; 
+}
+
+.spacer {
+    margin-top: 20px;
+    margin-bottom: 20px;
 }

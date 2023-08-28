@@ -28,17 +28,17 @@
                 <br>
                 <div class="match-container">
                     {% for game in schedule_data %}
-                    <div class="match-row">
+                    <div class="glass">
                         <div class="date row">{{ game.date }}</div>
                         <div class="teams row">
                             <div class="team away d-flex col">
-                                <div class="team-name">{{ game.away_team }}</div>
+                                <div class="white-bold">{{ game.away_team }}</div>
                                 <img src="{{ game.away_team.logo.url }}" alt="{{ game.away_team.name }} Logo" class="team-logo img-fluid">
                             </div>
                             <div class="at col-1">at</div>
                             <div class="team home d-flex col">
                                 <img src="{{ game.home_team.logo.url }}" alt="{{ game.home_team.name }} Logo" class="team-logo img-fluid">
-                                <div class="team-name">{{ game.home_team }}</div>
+                                <div class="white-bold">{{ game.home_team }}</div>
                             </div>
                         </div>
                         <div class="location row">{{ game.location }}</div>
