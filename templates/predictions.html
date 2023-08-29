@@ -1,119 +1,121 @@
-<!-- predictions.html -->
-{% extends 'base.html' %}
-{% block content %}
-<div class="text-center">
-    <h1>Predictions</h1>
-    <form method="get" style="display: inline-block;">
-        <label for="week_number">Select a week:</label>
-        <select name="week_number" id="week_number">
-            {% for week in weeks %}
-            <option value="{{ week }}" {% if week == selected_week|stringformat:"s" %}selected{% endif %}>Week {{ week }}</option>
-            {% endfor %}
-        </select>
-    </form>
-</div>
-<div class="spacer"></div>
+    <!-- predictions.html -->
+    {% extends 'base.html' %}
+    {% block content %}
+    <div class="text-center">
+        <h1>Predictions</h1>
+        <form method="get" style="display: inline-block;">
+            <label for="week_number">Select a week:</label>
+            <select name="week_number" id="week_number">
+                {% for week in weeks %}
+                <option value="{{ week }}" {% if week == selected_week|stringformat:"s" %}selected{% endif %}>Week {{ week }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+    <div class="spacer"></div>
 
-<div class="d-flex justify-content-center">
-    <form method="post" id="PredictionsForm" class="glass text-center">
-        {% csrf_token %}
-        {% for game in games %}  
-        <div class="row mb-2 ">
-            <div class="col-12 d-flex align-items-center">
-                <div class="col-3 ms-1">
-                    <input class="form-control form-control-sm score-input" type="number" name="predicted_home_score_{{ game.match.pk }}" value="{{ game.predicted_home_score }}" {% if current_time > game.match.date %}disabled{% endif %} required>
+    <div class="d-flex justify-content-center">
+        <form method="post" id="PredictionsForm" class="glass text-center">
+            {% csrf_token %}
+            {% for game in games %}  
+            <div class="row mb-2 game-row" id="game_{{ game.match.pk }}">
+                <div class="col-12 d-flex align-items-center">
+                    <div class="col-3 ms-1">
+                        <input class="form-control form-control-sm score-input" type="number" name="predicted_home_score_{{ game.match.pk }}" value="{{ game.predicted_home_score }}" {% if current_time > game.match.date %}disabled{% endif %} required>
+                    </div>
+                    <div class="col-6 align-items-center ms-1">
+                        <img src="{{ game.match.away_team.logo.url }}" alt="{{ game.away_team.name }} Logo" class="team-logo img-fluid mr-2">
+                        <span class="white-bold">{{ game.match.away_team.short_name }} at {{ game.match.home_team.short_name }}</span>
+                        <img src="{{ game.match.home_team.logo.url }}" alt="{{ game.home_team.name }} Logo" class="team-logo img-fluid ml-2">
+                    </div>
+                    <div class="col-3 me-1 text-end">
+                        <input class="form-control form-control-sm score-input" type="number" name="predicted_away_score_{{ game.match.pk }}" value="{{ game.predicted_away_score }}" {% if current_time > game.match.date %}disabled{% endif %} required>
+                    </div>
                 </div>
-                <div class="col-6 align-items-center">
-                    <img src="{{ game.match.away_team.logo.url }}" alt="{{ game.away_team.name }} Logo" class="team-logo img-fluid mr-2">
-                    <span class="white-bold">{{ game.match.away_team.short_name }} at {{ game.match.home_team.short_name }}</span>
-                    <img src="{{ game.match.home_team.logo.url }}" alt="{{ game.home_team.name }} Logo" class="team-logo img-fluid ml-2">
-                </div>
-                <div class="col-3 me-1 text-end">
-                    <input class="form-control form-control-sm score-input" type="number" name="predicted_away_score_{{ game.match.pk }}" value="{{ game.predicted_away_score }}" {% if current_time > game.match.date %}disabled{% endif %} required>
-                </div>
-            </div>
-            <div class="col-12 d-flex align-items-center">
-                <div class="col-12">
+                <div class="col-12 d-flex align-items-center me-1">
                     <div class="col-12 d-flex align-items-center text-center">
                         {% if current_time < game.match.date %}
                         <div class="countdown col-12 white-bold" data-time="{{ game.match.date|date:"U" }}"></div>
                         {% endif %}
                     </div>
-                    
                 </div>
+                
             </div>
-            
-        </div>
-        <hr style="color: white;">
-        {% endfor %}
+            <hr style="color: white;">
+            {% endfor %}
 
-    </form>
-</div>
+        </form>
+    </div>
 
-<script>
-    const weekDropdown = document.getElementById('week_number');
-    const inputs = document.querySelectorAll('input');
-    const form = document.getElementById('PredictionsForm');
+    <script>
+        const weekDropdown = document.getElementById('week_number');
+        const inputs = document.querySelectorAll('input');
+        const form = document.getElementById('PredictionsForm');
 
-    weekDropdown.value = {{ selected_week }};
+        weekDropdown.value = {{ selected_week }};
 
-    inputs.forEach(input => {
-        input.addEventListener('change', () => {
-        form.submit();
-        });
-    });
-
-    weekDropdown.addEventListener('change', () => {
-        document.cookie = 'selectedWeekPredictions=' + weekDropdown.value;
-        document.getElementById('PredictionsForm').submit();
-    });
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const countdownElements = document.querySelectorAll('.countdown');
-    
-        countdownElements.forEach(element => {
-            const endTime = parseInt(element.getAttribute('data-time'), 10) * 1000; // Convert to milliseconds
-            updateCountdown(element, endTime);
-            setInterval(() => {
-                updateCountdown(element, endTime);
-            }, 1000); // Update every second
-        });
-    });
-    
-    document.addEventListener('DOMContentLoaded', function() {
-        const countdownElements = document.querySelectorAll('.countdown');
-    
-        countdownElements.forEach(element => {
-            const endTime = parseInt(element.getAttribute('data-time'), 10) * 1000; // Convert to milliseconds
-            updateCountdown(element, endTime);
-            setInterval(() => {
-                updateCountdown(element, endTime);
-            }, 1000); // Update every second
-        });
-    });
-    
-    function updateCountdown(element, endTime) {
-        const now = Date.now();
-        const timeDifference = endTime - now;
+        inputs.forEach(input => {
+            input.addEventListener('change', (e) => {
+                var gameRow = e.target.closest('.game-row');
         
-        if (timeDifference < 0) {
-            element.textContent = 'Prediction locked!';
-            return;
+                if (gameRow) {
+                    window.location.hash = gameRow.id;  // set the URL hash to game's id
+                }
+                form.submit();
+            });
+        });
+
+        weekDropdown.addEventListener('change', () => {
+            document.cookie = 'selectedWeekPredictions=' + weekDropdown.value;
+            document.getElementById('PredictionsForm').submit();
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const countdownElements = document.querySelectorAll('.countdown');
+        
+            countdownElements.forEach(element => {
+                const endTime = parseInt(element.getAttribute('data-time'), 10) * 1000; // Convert to milliseconds
+                updateCountdown(element, endTime);
+                setInterval(() => {
+                    updateCountdown(element, endTime);
+                }, 1000); // Update every second
+            });
+        });
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const countdownElements = document.querySelectorAll('.countdown');
+        
+            countdownElements.forEach(element => {
+                const endTime = parseInt(element.getAttribute('data-time'), 10) * 1000; // Convert to milliseconds
+                updateCountdown(element, endTime);
+                setInterval(() => {
+                    updateCountdown(element, endTime);
+                }, 1000); // Update every second
+            });
+        });
+        
+        function updateCountdown(element, endTime) {
+            const now = Date.now();
+            const timeDifference = endTime - now;
+            
+            if (timeDifference < 0) {
+                element.textContent = 'Prediction locked!';
+                return;
+            }
+        
+            const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
+        
+            // Display days only if it's greater than 0
+            let timeLeftText = `${hours}h ${minutes}m ${seconds}s left`;
+            if (days > 0) {
+                timeLeftText = `${days}d ${timeLeftText}`;
+            }
+        
+            element.textContent = timeLeftText;
         }
-    
-        const days = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((timeDifference % (1000 * 60)) / 1000);
-    
-        // Display days only if it's greater than 0
-        let timeLeftText = `${hours}h ${minutes}m ${seconds}s left`;
-        if (days > 0) {
-            timeLeftText = `${days}d ${timeLeftText}`;
-        }
-    
-        element.textContent = timeLeftText;
-    }
-    
-</script>
-{% endblock content %}
+        
+    </script>
+    {% endblock content %}

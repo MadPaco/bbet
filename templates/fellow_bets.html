@@ -2,24 +2,49 @@
 
 {% block content %}
 <div class="container">
-    <html>
-    <head>
-        <title>Others Bets</title>
-    </head>
-    <body>
-        <div class="row">
-            <div class="col-md-12">
-                <h1>Others' Bets</h1>
-                <label for="week_number">Select Week:</label>
-                <select id="week_number" onchange="location = this.value;">
-                    {% for week in weeks %}
-                    <option value="{% url 'fellow_bets' week %}" {% if week == week_number %}selected{% endif %}>Week {{ week }}</option>
-                    {% endfor %}
-                </select>
+    <div class="row">
+        <div class="col-12">
+            <h1>Others' Bets</h1>
+            <label for="week_number">Select Week:</label>
+            <select id="week_number" onchange="location = this.value;" class="form-control mb-3">
+                {% for week in weeks %}
+                <option value="{% url 'fellow_bets' week %}" {% if week == week_number %}selected{% endif %}>Week {{ week }}</option>
+                {% endfor %}
+            </select>
+            
+            <!-- Cards for Mobile View -->
+            <div class="d-block d-md-none">
+                {% for match in matches %}
+                <div class="card mb-2">
+                    <div class="card-header">
+                        {{ match.away_team }} at {{ match.home_team }}
+                    </div>
+                    <div class="card-body">
+                        Result: {{ match.away_team_result }} : {{ match.home_team_result }}
+                        <hr>
+                        {% for user in users %}
+                            <h6>{{ user.username }}</h6>
+                            {% for bet in bets %}
+                                {% if bet.user == user and bet.match == match %}
+                                    Bet: {% if match.has_started %}{{ bet.predicted_away_score }} : {{ bet.predicted_home_score }}{% else %}🔒{% endif %} <br>
+                                    Points: {% if match.has_started %}{{ bet.points }}{% endif %}
+                                    <br>
+                                    <br>
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Table for Desktop View -->
+            <div class="d-none d-md-block table-responsive">
                 <table class="table">
                     <thead>
                         <tr style="background-color: white;">
                             <th>Match</th>
+                            <th>Result</th>
                             {% for user in users %}
                             <th>{{ user.username }}'s Bet</th>
                             <th>{{ user.username }}'s points</th>
@@ -30,18 +55,25 @@
                         {% for match in matches %}
                         <tr>
                             <td>{{ match.away_team }} at {{ match.home_team }}</td>
+                            <td>{{ match.away_team_result }} : {{ match.home_team_result }}</td>
                             {% for user in users %}
                             <td>
                                 {% for bet in bets %}
                                     {% if bet.user == user and bet.match == match %}
-                                        {{ bet.predicted_away_score }} : {{ bet.predicted_home_score }}
+                                        {% if match.has_started %}
+                                            {{ bet.predicted_away_score }} : {{ bet.predicted_home_score }}
+                                        {% else %}
+                                            Game not started
+                                        {% endif %}
                                     {% endif %}
                                 {% endfor %}
                             </td>
                             <td>
                                 {% for bet in bets %}
                                     {% if bet.user == user and bet.match == match %}
-                                        {{ bet.points }}
+                                        {% if match.has_started %}
+                                            {{ bet.points }}
+                                        {% endif %}
                                     {% endif %}
                                 {% endfor %}
                             </td>
@@ -56,7 +88,6 @@
                 </table>
             </div>
         </div>
-    </body>
-    </html>
+    </div>
 </div>
 {% endblock %}

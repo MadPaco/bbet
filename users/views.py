@@ -171,6 +171,7 @@ class FellowBetsView(ListView):
         context['matches'] = Match.objects.filter(week_number=self.kwargs.get('week_number'))
         context['users'] = CustomUser.objects.all()
         context['week_number'] = self.kwargs.get('week_number')
+        context['current_time']: timezone.now()
         
         return context
     

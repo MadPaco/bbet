@@ -1,3 +1,7 @@
+html {
+    scroll-behavior: smooth;
+}
+
 body {
     background-image: url("../../media/background.jpg");
     background-repeat: no-repeat;
@@ -194,7 +198,7 @@ input[type=number] {
 }
 
 .score-input {
-    width: 5%;
+    width: 80% !important; 
     text-align: center;
     box-sizing: border-box; 
 }
