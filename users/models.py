@@ -3,15 +3,6 @@ from django.db import models
 from django.urls import reverse
 
 
-class CustomUser(AbstractUser):
-    """ custom User class, adding an age field"""
-    age = models.PositiveIntegerField(null=True, blank=True)
-    favorite_team = models.CharField(max_length=50, null=True, blank=True)
-    
-
-    def __str__(self):
-        return self.username
-
 class Team(models.Model):
     name = models.CharField(max_length=50, blank=True, primary_key=True)
     logo = models.ImageField(upload_to='team_logos/', null=True, blank=True)
@@ -19,6 +10,14 @@ class Team(models.Model):
 
     def __str__(self):
         return self.name
+    
+
+class CustomUser(AbstractUser):
+    favorite_team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    def __str__(self):
+        return self.username
+
 
 class Match(models.Model):
     match_number = models.PositiveIntegerField(primary_key=True)
