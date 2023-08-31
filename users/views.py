@@ -1,10 +1,10 @@
 from datetime import timedelta
 from django.urls import reverse_lazy, reverse
-from django.views.generic import CreateView, TemplateView, ListView, View
-from django.db.models import Q
+from django.views.generic import CreateView, TemplateView, ListView, View, DetailView
+from django.db.models import Q, Sum
 from .forms import CustomUserCreationForm
 from .models import Match, Bet, CustomUser
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.utils import timezone
 
@@ -209,4 +209,18 @@ class StandingsView(ListView):
 
         return context
 
+class ProfileView(DetailView):
+    model = CustomUser
+    template_name = 'profile.html'
+    context_object_name = 'user'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.get_object()
+        context["weekly_points"] = Bet.objects.filter(user=user).values('match__week_number').annotate(week_points=Sum('points')).order_by('match__week_number')
+        context["total_points"] = Bet.objects.filter(user=user).aggregate(total_points=Sum('points'))
+        
+        return context
     
+    def get_object(self):
+        return get_object_or_404(CustomUser, username=self.kwargs['username'])

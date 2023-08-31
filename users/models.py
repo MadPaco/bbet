@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.urls import reverse
+from django.utils.text import slugify
+
 
 
 class Team(models.Model):
@@ -11,9 +13,15 @@ class Team(models.Model):
     def __str__(self):
         return self.name
     
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.username)
+        super().save(*args, **kwargs)
+        
 
 class CustomUser(AbstractUser):
     favorite_team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True)
+    models.SlugField(null=True, blank=True, unique=True)
     
     def __str__(self):
         return self.username
