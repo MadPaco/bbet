@@ -1,7 +1,7 @@
 from datetime import timedelta
 from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, TemplateView, ListView, View, DetailView
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count
 from .forms import CustomUserCreationForm
 from .models import Match, Bet, CustomUser
 from django.shortcuts import render, redirect, get_object_or_404
@@ -218,8 +218,12 @@ class ProfileView(DetailView):
         context = super().get_context_data(**kwargs)
         user = self.get_object()
         context["weekly_points"] = Bet.objects.filter(user=user).values('match__week_number').annotate(week_points=Sum('points')).order_by('match__week_number')
-        context["total_points"] = Bet.objects.filter(user=user).aggregate(total_points=Sum('points'))
-        
+        total_points_aggregate = Bet.objects.filter(user=user).aggregate(total_points=Sum('points'))
+        context["total_points"] = total_points_aggregate['total_points'] or 0
+
+        points_breakdown = Bet.objects.filter(user=user).values('points').annotate(count=Count('points'))
+        context["points_breakdown"] = {entry['points']: entry['count'] for entry in points_breakdown}
+        context["bio"] = user.bio
         return context
     
     def get_object(self):

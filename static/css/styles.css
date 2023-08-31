@@ -207,3 +207,14 @@ input[type=number] {
     margin-top: 20px;
     margin-bottom: 20px;
 }
+
+.fade-in {
+    animation-name: fadeIn;
+    animation-duration: 1.5s;
+}
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
