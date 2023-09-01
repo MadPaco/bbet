@@ -1,11 +1,11 @@
 from datetime import timedelta
 from django.urls import reverse_lazy, reverse
-from django.views.generic import CreateView, TemplateView, ListView, View, DetailView
+from django.views.generic import CreateView, TemplateView, ListView, View, DetailView, UpdateView
 from django.db.models import Q, Sum, Count
-from .forms import CustomUserCreationForm
+from .forms import CustomUserCreationForm, CustomUserChangeForm
 from .models import Match, Bet, CustomUser
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.utils import timezone
 
 
@@ -228,3 +228,22 @@ class ProfileView(DetailView):
     
     def get_object(self):
         return get_object_or_404(CustomUser, username=self.kwargs['username'])
+
+class ProfileUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = CustomUser
+    form_class = CustomUserChangeForm
+    template_name = 'profile_edit.html'  # Change to your template name
+    
+    def get_success_url(self):
+        # After successfully editing the profile, redirect to the user's profile page.
+        # This assumes you have a profile detail view that is accessible via 'profile_detail'
+        # and accepts the user's ID as a parameter. Adjust as needed.
+        return reverse_lazy('edit_profile', kwargs={'username': self.request.user.username})
+
+    def test_func(self):
+        # Ensure the user is editing their own profile
+        return self.get_object() == self.request.user
+
+    def get_object(self, queryset=None):
+        # Get the current user object for editing
+        return self.request.user

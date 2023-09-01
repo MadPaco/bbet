@@ -1,7 +1,13 @@
 from django.contrib import admin
 from .models import CustomUser, Match, Bet
-# Register your models here.
+
+class MatchAdmin(admin.ModelAdmin):
+    list_filter = ('week_number',) 
+
+class BetAdmin(admin.ModelAdmin):
+    list_filter = ('match__week_number','user__username',)  
+
 
 admin.site.register(CustomUser)
-admin.site.register(Match)
-admin.site.register(Bet)
+admin.site.register(Match, MatchAdmin)  
+admin.site.register(Bet, BetAdmin)  

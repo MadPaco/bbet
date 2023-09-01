@@ -23,6 +23,7 @@ class CustomUser(AbstractUser):
     favorite_team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True)
     models.SlugField(null=True, blank=True, unique=True)
     bio = models.TextField(blank=True, null=True)
+    profile_picture = models.ImageField(upload_to='media/profiles_pictures', blank=True, null=True)
     
     def __str__(self):
         return self.username
@@ -37,6 +38,9 @@ class Match(models.Model):
     away_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='away_team')
     home_team_result = models.IntegerField(null=True, blank=True)
     away_team_result = models.IntegerField(null=True, blank=True)
+    odds_home = models.IntegerField(null=True, blank=True)
+    odds_away = models.IntegerField(null=True, blank=True)
+    over_under = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         return f"Week {self.week_number}: {self.away_team} at {self.home_team}"

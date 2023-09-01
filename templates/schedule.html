@@ -34,6 +34,7 @@
                             <div class="team away d-flex col">
                                 <div class="white-bold">{{ game.away_team }}</div>
                                 <img src="{{ game.away_team.logo.url }}" alt="{{ game.away_team.name }} Logo" class="team-logo img-fluid">
+                                
                             </div>
                             <div class="at col-1">at</div>
                             <div class="team home d-flex col">
@@ -42,6 +43,17 @@
                             </div>
                         </div>
                         <div class="location row">{{ game.location }}</div>
+                        <div class="odds row">
+                            <div class="away-odds col-4 text-end text-white ">
+                                <span class="odds-label">Odds:</span> {{ game.odds_away }}
+                            </div>
+                            <div class="over-under col-4 text-center text-white">
+                                <span class="odds-label">Over/Under:</span> {{ game.over_under }}
+                            </div>
+                            <div class="home-odds col-4 text-start text-white">
+                                <span class="odds-label">Odds:</span> {{ game.odds_home }}
+                            </div>
+                        </div>
                     </div>
                     {% endfor %}
                 </div>
