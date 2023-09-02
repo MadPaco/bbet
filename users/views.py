@@ -1,12 +1,15 @@
 from datetime import timedelta
 from django.urls import reverse_lazy, reverse
-from django.views.generic import CreateView, TemplateView, ListView, View, DetailView, UpdateView
+from django.views.generic import CreateView, TemplateView, ListView, View, DetailView, UpdateView, DeleteView
 from django.db.models import Q, Sum, Count
 from .forms import CustomUserCreationForm, CustomUserChangeForm
-from .models import Match, Bet, CustomUser
+from .models import Match, Bet, CustomUser, Achievement, UserAchievement
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.utils import timezone
+from django.contrib.auth import logout
+from django.contrib import messages
+
 
 
 class HomePageView(TemplateView):
@@ -118,6 +121,11 @@ class EnterResultsView(UserPassesTestMixin, ListView):
         week_number = self.kwargs.get('week_number')
         return reverse('enter_results', kwargs={'week_number': week_number})
     
+    def award_achievement(self, user, achievement_name):
+        achievement = Achievement.objects.get(name=achievement_name)
+        if not UserAchievement.objects.filter(user=user, achievement=achievement).exists():
+            UserAchievement.objects.create(user=user, achievement=achievement, date_achieved=timezone.now())
+    
         
     def post(self, request, *args, **kwargs):
         week_number = self.kwargs.get('week_number')
@@ -126,17 +134,10 @@ class EnterResultsView(UserPassesTestMixin, ListView):
         for match in matches:
             home_score_key = f"home_team_result_{match.match_number}"
             away_score_key = f"away_team_result_{match.match_number}"
+            home_score = request.POST.get(home_score_key, 0)
+            away_score = request.POST.get(away_score_key, 0)
 
-            try:
-                home_score = request.POST.get(home_score_key)
-            except ValueError:
-                home_score = None
-            try:
-                away_score = request.POST.get(away_score_key)
-            except ValueError:
-                away_score = None
-            print(type(home_score))
-            if home_score is not None and len(home_score) > 0 and away_score is not None and len(away_score) > 0:
+            if home_score and away_score:
                 match.home_team_result = int(home_score)
                 match.away_team_result = int(away_score)
                 match.save()
@@ -146,15 +147,59 @@ class EnterResultsView(UserPassesTestMixin, ListView):
                     points = 0
                     if bet.predicted_home_score == match.home_team_result and bet.predicted_away_score == match.away_team_result:
                         points = 5
+                        self.award_achievement(bet.user, "The Predictor")
                     elif (bet.predicted_home_score - bet.predicted_away_score) == (match.home_team_result - match.away_team_result):
                         points = 3
                     elif (bet.predicted_home_score > bet.predicted_away_score and match.home_team_result > match.away_team_result) or \
-                         (bet.predicted_home_score < bet.predicted_away_score and match.home_team_result < match.away_team_result):
+                        (bet.predicted_home_score < bet.predicted_away_score and match.home_team_result < match.away_team_result):
                         points = 1
                     bet.points = points
                     bet.save()
 
+                    # Check for other achievements:
+                    # "Beginner's Luck"
+                    if Bet.objects.filter(user=bet.user, points__gt=0).count() == 1:
+                        self.award_achievement(bet.user, "Beginner's Luck")
+
+                    # "Underdog"
+                    if match.odds_home < 0 and bet.predicted_home_score > bet.predicted_away_score:
+                        self.award_achievement(bet.user, "Underdog")
+                    if match.odds_away < 0 and bet.predicted_away_score > bet.predicted_home_score:
+                        self.award_achievement(bet.user, "Underdog")
+
+                    # "Truther" 
+                    if bet.user.favorite_team == match.home_team and match.odds_home < 0:
+                        self.award_achievement(bet.user, "Truther")
+                    if bet.user.favorite_team == match.away_team and match.odds_away < 0:
+                        self.award_achievement(bet.user, "Truther")
+
+                    # "Brave Soul"
+                    if match.odds_home < 0 and bet.predicted_home_score - bet.predicted_away_score >= 10 and match.home_team_result - match.away_team_result >= 10:
+                        self.award_achievement(bet.user, "Brave Soul")
+                    if match.odds_away < 0 and bet.predicted_away_score - bet.predicted_home_score >= 10 and match.away_team_result - match.home_team_result >= 10:
+                        self.award_achievement(bet.user, "Brave Soul")
+
+        # Checks outside the match loop, that concern user's overall performance:
+        # Note: These checks might need optimization for performance reasons.
+
+        # "5/7"
+        users_with_all_correct_bets = CustomUser.objects.annotate(correct_bets=Count('bet', filter=Q(bet__points__gt=0))).filter(correct_bets=matches.count())
+        for user in users_with_all_correct_bets:
+            self.award_achievement(user, "5/7")
+
+        # "Jackpot"
+        users_with_77_points = CustomUser.objects.annotate(total_points=Sum('bet__points')).filter(total_points=77)
+        for user in users_with_77_points:
+            self.award_achievement(user, "Jackpot")
+
+        # "Lucky Seven" and "Employee of the Week"
+        for bet in Bet.objects.filter(match__in=matches):
+            if Bet.objects.filter(user=bet.user, match__week_number=week_number, points__gt=0).count() == 7:
+                self.award_achievement(bet.user, "Lucky Seven")
+            # "Employee of the Week" can be complex and might require additional computation to determine the user with highest points.
+
         return redirect(self.get_success_url())
+
     
 class FellowBetsView(ListView):
     model = Bet
@@ -222,7 +267,15 @@ class ProfileView(DetailView):
         context["total_points"] = total_points_aggregate['total_points'] or 0
 
         points_breakdown = Bet.objects.filter(user=user).values('points').annotate(count=Count('points'))
-        context["points_breakdown"] = {entry['points']: entry['count'] for entry in points_breakdown}
+        points_dict = {entry['points']: entry['count'] for entry in points_breakdown}
+        context["points_1_count"] = points_dict.get(1, 0)
+        context["points_3_count"] = points_dict.get(3, 0)
+        context["points_5_count"] = points_dict.get(5, 0)    
+
+
+        user_achievements = UserAchievement.objects.filter(user=self.get_object())
+        context['user_achievements'] = user_achievements
+
         context["bio"] = user.bio
         return context
     
@@ -238,7 +291,7 @@ class ProfileUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         # After successfully editing the profile, redirect to the user's profile page.
         # This assumes you have a profile detail view that is accessible via 'profile_detail'
         # and accepts the user's ID as a parameter. Adjust as needed.
-        return reverse_lazy('edit_profile', kwargs={'username': self.request.user.username})
+        return reverse_lazy('profile', kwargs={'username': self.request.user.username})
 
     def test_func(self):
         # Ensure the user is editing their own profile
@@ -247,3 +300,19 @@ class ProfileUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def get_object(self, queryset=None):
         # Get the current user object for editing
         return self.request.user
+    
+class ProfileDeleteView(UserPassesTestMixin, DeleteView):
+    model = CustomUser
+    template_name = 'profile_confirm_delete.html'
+    slug_field = 'username'  # specifying the field on the model that the slug represents
+    slug_url_kwarg = 'username'  # the name of the keyword argument in the URL pattern
+    success_url = reverse_lazy('home')
+
+    def test_func(self):
+        # Ensuring that the user trying to delete is the logged-in user
+        return self.request.user == self.get_object()
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(self.request, "Profile deleted successfully!")
+        logout(request)
+        return super(ProfileDeleteView, self).delete(request, *args, **kwargs)

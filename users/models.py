@@ -23,7 +23,7 @@ class CustomUser(AbstractUser):
     favorite_team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True)
     models.SlugField(null=True, blank=True, unique=True)
     bio = models.TextField(blank=True, null=True)
-    profile_picture = models.ImageField(upload_to='media/profiles_pictures', blank=True, null=True)
+    profile_picture = models.ImageField(upload_to='profiles_pictures/', blank=True, null=True)
     
     def __str__(self):
         return self.username

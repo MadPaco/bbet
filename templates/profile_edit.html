@@ -3,6 +3,7 @@
 {% block content %}
     <h2>Edit Profile</h2>
     <form method="post" enctype="multipart/form-data">
+        <a href="{% url 'delete_profile' username=user.username %}" class="btn btn-danger">Delete Profile</a>
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">Save changes</button>

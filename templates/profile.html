@@ -4,7 +4,7 @@
 <div class="container mt-5">
     <div class="row mb-4">
         <div class="col-12">
-            <h2 class="display-4">{{ user.username }}'s Profile</h2>
+            <h2 class="display-4 text-white">{{ user.username }}'s Profile</h2>
             <a href="{% url 'edit_profile' username=user.username %}" class="btn btn-primary">Edit Profile</a>
         </div>
     </div>
@@ -13,64 +13,96 @@
         <div class="col-md-6">
             <!-- Bio Section -->
             {% if user.bio %}
-            <h4>About {{ user.username }}</h4>
+            <h4 class="text-white">About {{ user.username }}</h4>
             <p>{{ user.bio }}</p>
             <hr>
             {% endif %}
             
-            <h4>Favorite Team</h4>
+            <h4 class="text-white">Favorite Team</h4>
             <div class="card fade-in">
                 <!-- Added a style to limit the height of the logo -->
                 <img src="{{ user.favorite_team.logo.url }}" alt="{{ user.favorite_team.name }} logo" class="card-img-top" style="max-height: 200px; object-fit: cover;">
                 <div class="card-body">
                     <h5 class="card-title">{{ user.favorite_team.name }}</h5>
-                    <p class="card-text">Short name: {{ user.favorite_team.short_name }}</p>
+                    <p class="card-text text-white">Short name: {{ user.favorite_team.short_name }}</p>
                 </div>
+            </div>
+            <!-- Achievements Section -->
+            <h4 class="mt-4 text-white">Achievements</h4>
+            <div class="row">
+                {% if user_achievements %}
+                    {% for achievement in user_achievements %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <!-- Assuming achievement has an associated image called 'icon' -->
+                            {% if achievement.icon %}
+                            <img src="{{ achievement.icon.url }}" alt="{{ achievement.name }} icon" class="card-img-top" style="max-height: 100px; object-fit: cover;">
+                            {% endif %}
+                            <div class="card-body text-black text-center">
+                                <h5 class="card-title">{{ achievement.achievement.name }}</h5>
+                                <p class="card-text text-black text-center">{{ achievement.achievement.description }}</p>
+                                <!-- Assuming achievement has an associated 'date_achieved' -->
+                                <small class="text-muted">Achieved on {{ achievement.date_achieved|date:"d M, Y" }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="col-12">
+                    <p>No achievements earned yet.</p>
+                </div>
+                {% endif %}
             </div>
         </div>
         <div class="col-md-6">
-            <h4 class="mb-4">Points Overview</h4>
-            <h5 class="mb-3">Total Points</h5>
+            <h4 class="mb-4 text-white">Points Overview</h4>
+            <h5 class="mb-3 text-white">Total Points</h5>
             <p class="lead mb-4">{{ total_points }}</p>
 
-            <h5>Points Breakdown</h5>
+            <h5 class="text-white">Points Breakdown</h5>
             <ul>
-                {% if points_breakdown.1 %}
-                <li><strong>1 Point:</strong> {{ points_breakdown.1 }} times</li>
-                {% else %}
-                <li><strong>1 Point:</strong> 0 times</li>
-                {% endif %}
-                {% if points_breakdown.3 %}
-                <li><strong>3 Points:</strong> {{ points_breakdown.3 }} times</li>
-                {% else %}
-                <li><strong>3 Points:</strong> 0 times</li>
-                {% endif %}
-                {% if points_breakdown.4 %}
-                <li><strong>5 Points:</strong> {{ points_breakdown.5 }} times</li>
-                {% else %}
-                <li><strong>5 Points:</strong> 0 times</li>
-                {% endif %}
+                <li><strong>1 Point:</strong> {{ points_1_count }} times</li>
+                <li><strong>3 Points:</strong> {{ points_3_count }} times</li>
+                <li><strong>5 Points:</strong> {{ points_5_count }} times</li>
             </ul>
         
             
-            <h5>Points by Week</h5>
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Week Number</th>
-                        <th>Points</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for week in weekly_points %}
-                    <tr>
-                        <td>{{ week.match__week_number }}</td>
-                        <td>{{ week.week_points }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <h5 class="text-white">Points by Week</h5>
+        <div style="background-color: white;">
+            <canvas id="pointsGraph"></canvas>
         </div>
+
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    let weeks = [{% for week in weekly_points %}"{{ week.match__week_number }}",{% endfor %}];
+    let points = [{% for week in weekly_points %}{{ week.week_points }},{% endfor %}];
+
+    document.addEventListener("DOMContentLoaded", function() {
+        let ctx = document.getElementById('pointsGraph').getContext('2d');
+        
+        let chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: weeks,
+                datasets: [{
+                    label: 'Points by Week',
+                    backgroundColor: 'rgba(15,48,84, 0.5)', // Color of the area under the line
+                    borderColor: 'rgb(15,48,84)', // Line color
+                    data: points,
+                    fill: true, // Fill the area under the line
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true // Ensures that the graph starts at 0
+                    }
+                }
+            }
+        });
+    });
+
+</script>
 {% endblock %}

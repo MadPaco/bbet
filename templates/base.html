@@ -3,7 +3,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>{% block title %}BruehBet 2.0{% endblock title %}</title>
+  <title>{% block title %}BruehBet 2.1{% endblock title %}</title>
   <meta name="viewport" content="width=device-width,
   initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
@@ -18,6 +18,7 @@
       <div class="container">
         <div class="d-flex flex-wrap align-items-center justify-content-center
           justify-content-lg-start">
+          <img src="{% static 'logo/png/logo-color.png' %}" alt="BruehBet Logo" class="me-3 logo">
           <a class="navbar-brand" href="{% url 'home' %}">BruehBet 2.0</a>
           <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center
             mb-md-0">
@@ -26,7 +27,11 @@
           <div class="dropdown text-end">
             <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" id="dropdownUser1"
               data-bs-toggle="dropdown" aria-expanded="false">
-              <img src="{{ user.favorite_team.logo.url }}" width="30" height="30" class="rounded-circle me-2">
+              {% if user.profile_picture %}
+                <img src="{{ user.profile_picture.url }}" width="30" height="30" class="rounded-circle me-2">
+              {% else %}
+                <img src="{{ user.favorite_team.logo.url }}" width="30" height="30" class="rounded-circle me-2">
+              {% endif %}
               {{ user.username }}
             </a>
             <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser">

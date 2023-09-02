@@ -222,3 +222,48 @@ input[type=number] {
     color: white;
 }
 
+/* Default logo size for mobile devices */
+.logo {
+    width: 50px;
+    height: auto;
+}
+
+/* When the viewport width is at least 576px (e.g., tablets) */
+@media (min-width: 576px) {
+    .logo {
+        width: 60px;
+    }
+}
+
+/* When the viewport width is at least 768px (e.g., small laptops, tablets in landscape) */
+@media (min-width: 768px) {
+    .logo {
+        width: 70px;
+    }
+}
+
+/* When the viewport width is at least 992px (e.g., desktops) */
+@media (min-width: 992px) {
+    .logo {
+        width: 80px;
+    }
+}
+
+/* Typography and whitespace for table headers */
+.custom-table thead th {
+    font-size: 1.1em;
+    font-weight: 500;
+    padding: 10px 15px;
+    background-color: #f5f5f5; /* A soft background for headers */
+}
+
+/* Typography and whitespace for table cells */
+.custom-table tbody td {
+    font-size: 1em;
+    padding: 8px 15px;
+}
+
+/* Hover effects for rows */
+.custom-table tbody tr:hover {
+    background-color: #e9e9e9; /* A soft highlight color */
+}
