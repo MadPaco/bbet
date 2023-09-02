@@ -147,7 +147,7 @@ class EnterResultsView(UserPassesTestMixin, ListView):
                     points = 0
                     if bet.predicted_home_score == match.home_team_result and bet.predicted_away_score == match.away_team_result:
                         points = 5
-                        self.award_achievement(bet.user, "The Predictor")
+                        self.award_achievement(bet.user, "Detective")
                     elif (bet.predicted_home_score - bet.predicted_away_score) == (match.home_team_result - match.away_team_result):
                         points = 3
                     elif (bet.predicted_home_score > bet.predicted_away_score and match.home_team_result > match.away_team_result) or \
@@ -185,7 +185,7 @@ class EnterResultsView(UserPassesTestMixin, ListView):
         # "5/7"
         users_with_all_correct_bets = CustomUser.objects.annotate(correct_bets=Count('bet', filter=Q(bet__points__gt=0))).filter(correct_bets=matches.count())
         for user in users_with_all_correct_bets:
-            self.award_achievement(user, "5/7")
+            self.award_achievement(user, "Perfection")
 
         # "Jackpot"
         users_with_77_points = CustomUser.objects.annotate(total_points=Sum('bet__points')).filter(total_points=77)
