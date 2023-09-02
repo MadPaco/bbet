@@ -39,7 +39,7 @@
             <tbody>
                 {% for user, points in standings.items %}
                     <tr>
-                        <td>{{ user.username }}</td>
+                        <td><a href="{% url 'profile' user.username %}">{{ user.username }}</td>
                         {% for week, week_points in points.items %}
                             <td>{{ week_points }}</td>
                         {% endfor %}

@@ -46,8 +46,8 @@
                             <th>Match</th>
                             <th>Result</th>
                             {% for user in users %}
-                            <th>{{ user.username }}'s Bet</th>
-                            <th>{{ user.username }}'s points</th>
+                            <th><a href="{% url 'profile' user.username %}">{{ user.username }}</a>'s Bet</th>
+                            <th><a href="{% url 'profile' user.username %}">{{ user.username }}</a>'s Points</th>
                             {% endfor %}
                         </tr>
                     </thead>
