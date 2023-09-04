@@ -182,7 +182,7 @@ class EnterResultsView(UserPassesTestMixin, ListView):
         # Checks outside the match loop, that concern user's overall performance:
         # Note: These checks might need optimization for performance reasons.
 
-        # "5/7"
+        # "Perfection"
         users_with_all_correct_bets = CustomUser.objects.annotate(correct_bets=Count('bet', filter=Q(bet__points__gt=0))).filter(correct_bets=matches.count())
         for user in users_with_all_correct_bets:
             self.award_achievement(user, "Perfection")
@@ -191,12 +191,6 @@ class EnterResultsView(UserPassesTestMixin, ListView):
         users_with_77_points = CustomUser.objects.annotate(total_points=Sum('bet__points')).filter(total_points=77)
         for user in users_with_77_points:
             self.award_achievement(user, "Jackpot")
-
-        # "Lucky Seven" and "Employee of the Week"
-        for bet in Bet.objects.filter(match__in=matches):
-            if Bet.objects.filter(user=bet.user, match__week_number=week_number, points__gt=0).count() == 7:
-                self.award_achievement(bet.user, "Lucky Seven")
-            # "Employee of the Week" can be complex and might require additional computation to determine the user with highest points.
 
         return redirect(self.get_success_url())
 
@@ -259,6 +253,8 @@ class ProfileView(DetailView):
     template_name = 'profile.html'
     context_object_name = 'user'
 
+    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.get_object()
@@ -271,7 +267,8 @@ class ProfileView(DetailView):
         context["points_1_count"] = points_dict.get(1, 0)
         context["points_3_count"] = points_dict.get(3, 0)
         context["points_5_count"] = points_dict.get(5, 0)    
-
+        upcoming_matches = Match.objects.filter(Q(home_team=user.favorite_team) | Q(away_team=user.favorite_team),date__gt=timezone.now()).order_by('date')[:3]
+        context['upcoming_matches'] = upcoming_matches
 
         user_achievements = UserAchievement.objects.filter(user=self.get_object())
         context['user_achievements'] = user_achievements

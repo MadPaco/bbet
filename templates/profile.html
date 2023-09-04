@@ -2,33 +2,61 @@
 {% load static %}
 {% block content %}
 <div class="container mt-5">
-    <div class="row mb-4">
-        <div class="col-12">
-            <h2 class="display-4 text-white">{{ user.username }}'s Profile</h2>
-            <a href="{% url 'edit_profile' username=user.username %}" class="btn btn-primary">Edit Profile</a>
-        </div>
+    <div class="row mb-4" {% if user.favorite_team.logo %} style="background-image: url('{{user.favorite_team.logo.url}}'); background-size: cover;
+    background-position: center;" {% endif%}>
+        <div class="profile-header">
+            <h2 class="display-4 text-white text-outline">{{ user.username }}'s Profile</h2>
+            <a href="{% url 'edit_profile' username=user.username %}" class="btn btn-primary float-right">Edit Profile</a>
+         </div>
+
     </div>
 
     <div class="row mt-4">
         <div class="col-md-6">
-            <!-- Bio  -->
-            {% if user.bio %}
-            <h4 class="text-white">About {{ user.username }}</h4>
-            <p>{{ user.bio }}</p>
-            <hr>
-            {% endif %}
-            
-            <h4 class="text-white">Favorite Team</h4>
-            <div class="card fade-in">
-                <!-- Added a style to limit the height of the logo -->
-                <img src="{{ user.favorite_team.logo.url }}" alt="{{ user.favorite_team.name }} logo" class="card-img-top" style="max-height: 200px; object-fit: cover;">
-                <div class="card-body">
-                    <h5 class="card-title">{{ user.favorite_team.name }}</h5>
-                    <p class="card-text text-white">Short name: {{ user.favorite_team.short_name }}</p>
-                </div>
+            <div class="row">
+                {% if user.profile_picture %}
+                    <div class="profile-picture-container">
+                        <img src="{{ user.profile_picture.url }}" alt="Profile Picture" class="profile-picture">
+                    </div>
+                {% endif %}
+                            
+                <!-- Bio  -->
+                {% if user.bio %}
+                    <h4 class="text-white">About {{ user.username }}</h4>
+                    <p>{{ user.bio }}</p>
+                    <hr>
+                {% endif %}
             </div>
+
+            
+            <!-- Main container -->
+            <div class="card fade-in bg-dark text-white">
+                <!-- Favorite Team Header -->
+                <h4 class="mt-4 ml-4">Favorite Team</h4>
+
+                <!-- Favorite Team Body -->
+                <div class="card-body mt-2 bg-light text-dark rounded shadow-lg">
+                    <h5>{{ user.favorite_team.name }}</h5>
+                </div>
+
+                <!-- Upcoming Matches Header -->
+                <h4 class="mt-4 ml-4">Upcoming Matches</h4>
+
+                <!-- Upcoming Matches List -->
+                {% for match in upcoming_matches %}
+                <div class="card mt-3 bg-light text-dark rounded shadow-lg fade-in">
+                    <div class="card-body">
+                        <h6>{{ match.home_team.name }} vs {{ match.away_team.name }}</h6>
+                        <p>{{ match.date|date:"d M, Y" }}</p>
+
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            
             <!-- Achievements -->
-            <h4 class="mt-4 text-white">Achievements</h4>
+            <h4 class="mt-4 text-white ">Achievements</h4>
             <div class="owl-carousel">
                 {% if user_achievements %}
                     {% for achievement in user_achievements %}
