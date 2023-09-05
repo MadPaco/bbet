@@ -6,7 +6,9 @@
     background-position: center;" {% endif%}>
         <div class="profile-header">
             <h2 class="display-4 text-white text-outline">{{ user.username }}'s Profile</h2>
+            {% if user.username == request.user.username %}
             <a href="{% url 'edit_profile' username=user.username %}" class="btn btn-primary float-right">Edit Profile</a>
+            {% endif %}
          </div>
 
     </div>

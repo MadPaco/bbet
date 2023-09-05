@@ -150,9 +150,10 @@ padding: auto;
 }
 
 .team-logo {
-    width: 5vw;    
-    height: 5vw;   
+    width: 60px;
+    height: 60px;
 }
+
 
 .white-bold {
 font-size: 2vw;
@@ -293,6 +294,11 @@ input[type=number] {
     .logo {
         width: 60px;
     }
+
+    .team-logo {
+        width: 60px;
+        height: 60px;
+    }
 }
 
 /* When the viewport width is at least 768px (e.g., small laptops, tablets in landscape) */
@@ -300,12 +306,22 @@ input[type=number] {
     .logo {
         width: 70px;
     }
+
+    .team-logo {
+        width: 70px;
+        height: 70px;
+    }
 }
 
 /* When the viewport width is at least 992px (e.g., desktops) */
 @media (min-width: 992px) {
     .logo {
         width: 80px;
+    }
+
+    .team-logo {
+        width: 80px;
+        height: 80px;
     }
 }
 

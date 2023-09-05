@@ -52,7 +52,9 @@ class Bet(models.Model):
     predicted_home_score = models.PositiveIntegerField()
     predicted_away_score = models.PositiveIntegerField()
     points = models.IntegerField(default=0)
-    
+    timestamp = models.DateTimeField(auto_now_add=True, null=True)
+    changes_count = models.IntegerField(default=0)
+
     def get_admin_url(self):
         return reverse("admin:%s_%s_change" % (self._meta.app_label, self._meta.model_name), args=(self.id,))
 

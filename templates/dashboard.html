@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+
+    {% if has_placed_bets_for_all_matches %}
+        <p>All bets placed. Good luck.</p>
+    {% else %}
+        <h2 class="" style="color: red;">You haven't placed bets for all matches this week. Make sure to complete them!</h2>
+    {% endif %}
+    
+    <!-- User Stats -->
+    <div class="card mb-4">
+        <div class="card-header">Your Stats</div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item"><strong>Total Points:</strong> {{ total_points }}</li>
+            <li class="list-group-item"><strong>Current Ranking:</strong> {{ user_rank }}</li>
+            <li class="list-group-item"><strong>Best Week:</strong> Week {{ best_week.number }} with {{ best_week.points }} points</li>
+        </ul>
+    </div>
+    
+    <!-- Upcoming Matches -->
+    <div class="card mb-4">
+        <div class="card-header">Upcoming Matches</div>
+        <ul class="list-group list-group-flush">
+            {% for match in upcoming_matches %}
+                <li class="list-group-item">{{ match.away_team }} at {{ match.home_team }} - {{match.date}} </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+</div>
+{% endblock %}

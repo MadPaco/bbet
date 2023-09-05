@@ -1,4 +1,4 @@
-from datetime import timedelta
+import datetime
 from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, TemplateView, ListView, View, DetailView, UpdateView, DeleteView
 from django.db.models import Q, Sum, Count
@@ -8,7 +8,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.utils import timezone
 from django.contrib.auth import logout
-from django.contrib import messages
+from django.contrib import messages  
+from .models import Bet, Match
+from datetime import date, timedelta
+
 
 
 
@@ -68,6 +71,10 @@ class PredictionsView(View):
             'weeks': weeks,
             'current_time': timezone.now(),
         }
+
+        for game in games:
+            game.match.timestamp = int(game.match.date.timestamp())
+
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
@@ -81,15 +88,22 @@ class PredictionsView(View):
         current_time = timezone.now()
 
         for game in games:
+            game.match.timestamp = int(game.match.date.timestamp())
             home_score_key = f"predicted_home_score_{game.match.pk}"
             away_score_key = f"predicted_away_score_{game.match.pk}"
             predicted_home_score = request.POST.get(home_score_key)
             predicted_away_score = request.POST.get(away_score_key)
+            old_home_score = game.predicted_home_score
+            old_away_score = game.predicted_away_score
 
             if predicted_home_score is not None and predicted_away_score is not None:
+                if old_home_score != int(predicted_home_score) or old_away_score != int(predicted_away_score):
+                    game.changes_count += 1
+
                 game.predicted_home_score = int(predicted_home_score)
                 game.predicted_away_score = int(predicted_away_score)
                 game.save()
+            
 
         context = {
             'selected_week': selected_week,
@@ -130,6 +144,15 @@ class EnterResultsView(UserPassesTestMixin, ListView):
     def post(self, request, *args, **kwargs):
         week_number = self.kwargs.get('week_number')
         matches = Match.objects.filter(week_number=week_number)
+        users = CustomUser.objects.all()
+
+        # Define the target timestamp
+        target_timestamp = datetime.datetime(2023, 9, 1)  # This sets the time to 00:00:00 of September 1, 2023
+
+        # Iterate over the Bet objects with a null timestamp and update them
+        for bet in Bet.objects.filter(timestamp__isnull=True):
+            bet.timestamp = target_timestamp
+            bet.save()
 
         for match in matches:
             home_score_key = f"home_team_result_{match.match_number}"
@@ -155,12 +178,15 @@ class EnterResultsView(UserPassesTestMixin, ListView):
                         points = 1
                     bet.points = points
                     bet.save()
+                
 
-                    # Check for other achievements:
+                    # Check for achievements:
                     # "Beginner's Luck"
                     if Bet.objects.filter(user=bet.user, points__gt=0).count() == 1:
                         self.award_achievement(bet.user, "Beginner's Luck")
 
+                    if Bet.objects.filter(user=bet.user, changes_count__gt=5):
+                        self.award_achievement(bet.user, "Second Thoughts")
                     # "Underdog"
                     if match.odds_home < 0 and bet.predicted_home_score > bet.predicted_away_score:
                         self.award_achievement(bet.user, "Underdog")
@@ -179,8 +205,21 @@ class EnterResultsView(UserPassesTestMixin, ListView):
                     if match.odds_away < 0 and bet.predicted_away_score - bet.predicted_home_score >= 10 and match.away_team_result - match.home_team_result >= 10:
                         self.award_achievement(bet.user, "Brave Soul")
 
+                    # "last minute luck"
+                    time_difference = match.date - bet.timestamp  # Assuming match.start_time is a DateTime field.
+                    if time_difference.total_seconds() <= 60:  # 1 minute = 60 seconds
+                        if bet.points > 0: 
+                            self.award_achievement(bet.user, "Last Minute Luck")
+
         # Checks outside the match loop, that concern user's overall performance:
         # Note: These checks might need optimization for performance reasons.
+
+        # "lucky number seven"
+        for user in users:
+            print(user)
+            total_week_points = Bet.objects.filter(user=user, match__week_number=week_number).aggregate(week_points=Sum('points'))['week_points'] or 0
+            if total_week_points >= 7:
+                self.award_achievement(user, "Lucky Seven")
 
         # "Perfection"
         users_with_all_correct_bets = CustomUser.objects.annotate(correct_bets=Count('bet', filter=Q(bet__points__gt=0))).filter(correct_bets=matches.count())
@@ -192,9 +231,34 @@ class EnterResultsView(UserPassesTestMixin, ListView):
         for user in users_with_77_points:
             self.award_achievement(user, "Jackpot")
 
-        return redirect(self.get_success_url())
 
+        # 'employee of the week for all users who share the highest score of the week'
+        users_with_weekly_points = CustomUser.objects.annotate(
+        week_points=Sum('bet__points', filter=Q(bet__match__week_number=week_number))
+        ).order_by('-week_points')
+        if not users_with_weekly_points.exists():
+            return
+        top_score = users_with_weekly_points.first().week_points
+        top_scorers = users_with_weekly_points.filter(week_points=top_score)
+        for scorer in top_scorers:
+            self.award_achievement(scorer, "Employee of the week")
+
+        #seasoned pro, expert and did you even try? all use bets placed, so we group this
+
+        total_predictions = Bet.objects.filter(
+            request.user,
+            Q(predicted_home_score__gt=0) | Q(predicted_away_score__gt=0)
+        ).count()
+        if total_predictions >= 50:
+            self.award_achievement(request.user, "Seasoned Pro")
+        if total_predictions >= 100:
+            self.award_achievement(request.user, "Expert")
+        if total_predictions == 0:
+            self.award_achievement(request.user, "Did You Even Try?")
+
+        return redirect(self.get_success_url())
     
+
 class FellowBetsView(ListView):
     model = Bet
     template_name = 'fellow_bets.html'
@@ -290,13 +354,15 @@ class ProfileUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         # and accepts the user's ID as a parameter. Adjust as needed.
         return reverse_lazy('profile', kwargs={'username': self.request.user.username})
 
-    def test_func(self):
-        # Ensure the user is editing their own profile
-        return self.get_object() == self.request.user
-
     def get_object(self, queryset=None):
-        # Get the current user object for editing
-        return self.request.user
+        """Override to get the user based on the URL parameter"""
+        username = self.kwargs.get('username')
+        return get_object_or_404(CustomUser, username=username)
+
+    def test_func(self):
+        """Ensure the user is editing their own profile"""
+        user_to_edit = self.get_object()
+        return user_to_edit == self.request.user
     
 class ProfileDeleteView(UserPassesTestMixin, DeleteView):
     model = CustomUser
@@ -313,3 +379,75 @@ class ProfileDeleteView(UserPassesTestMixin, DeleteView):
         messages.success(self.request, "Profile deleted successfully!")
         logout(request)
         return super(ProfileDeleteView, self).delete(request, *args, **kwargs)
+
+
+class DashboardView(TemplateView):
+    template_name = 'dashboard.html'
+
+    def get_current_nfl_week(self):
+        today = datetime.date.today()
+        start_date = datetime.date(2023, 9, 5)  
+
+        # Check if today's date is before the NFL season starts
+        if today < start_date:
+            return "NFL season hasn't started yet."
+
+        # Calculate the difference in days between today and the start date
+        delta_days = (today - start_date).days
+
+        # Calculate the NFL week
+        week_number = delta_days // 7 + 1
+
+        if week_number > 18:  # Assuming an 18 week season
+            return "NFL regular season is over."
+
+        return week_number
+
+    def has_user_placed_bets_for_all_matches_this_week(self, user, current_week):
+        total_matches_this_week = Match.objects.filter(week_number=current_week).count()
+
+        # Filter bets where neither home_team_score nor away_team_score is 0
+        user_bets_this_week = Bet.objects.filter(
+            user=user, 
+            match__week_number=current_week,
+            predicted_home_score__gt=0, 
+            predicted_away_score__gt=0
+        ).count()
+        
+        return total_matches_this_week == user_bets_this_week
+    
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['total_points'] = Bet.objects.filter(user=self.request.user).aggregate(total=Sum('points'))['total'] or 0
+
+        # Fetch recent bets by the logged-in user
+        context['recent_bets'] = Bet.objects.filter(user=self.request.user).order_by('match__date')[:5]
+
+        current_week = self.get_current_nfl_week()
+        context['has_placed_bets_for_all_matches'] = self.has_user_placed_bets_for_all_matches_this_week(self.request.user, current_week)
+        
+        # Fetch upcoming matches
+        context['upcoming_matches'] = Match.objects.filter(date__gte=date.today()).order_by('date')[:5]
+        
+        ranked_users = CustomUser.objects.annotate(total_points=Sum('bet__points')).order_by('-total_points')
+        user_rank = 1
+        for rank, user in enumerate(ranked_users, start=1):
+            if user == self.request.user:
+                context['user_rank'] = rank
+                break
+
+        best_week_data = Bet.objects.filter(user=self.request.user).values('match__week_number').annotate(week_points=Sum('points')).order_by('-week_points').first()
+        if best_week_data:
+            context['best_week'] = {
+                'number': best_week_data['match__week_number'],
+                'points': best_week_data['week_points']
+            }
+        else:
+            context['best_week'] = {
+                'number': None,
+                'points': None
+            }
+            
+        return context
