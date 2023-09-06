@@ -47,7 +47,6 @@
                             <th>Result</th>
                             {% for user in users %}
                             <th><a href="{% url 'profile' user.username %}">{{ user.username }}</a>'s Bet</th>
-                            <th><a href="{% url 'profile' user.username %}">{{ user.username }}</a>'s Points</th>
                             {% endfor %}
                         </tr>
                     </thead>
@@ -61,18 +60,9 @@
                                 {% for bet in bets %}
                                     {% if bet.user == user and bet.match == match %}
                                         {% if match.has_started %}
-                                            {{ bet.predicted_away_score }} : {{ bet.predicted_home_score }}
+                                            {{ bet.predicted_away_score }} : {{ bet.predicted_home_score }} ({{bet.points}} points)
                                         {% else %}
-                                            Game not started
-                                        {% endif %}
-                                    {% endif %}
-                                {% endfor %}
-                            </td>
-                            <td>
-                                {% for bet in bets %}
-                                    {% if bet.user == user and bet.match == match %}
-                                        {% if match.has_started %}
-                                            {{ bet.points }}
+                                            🔒
                                         {% endif %}
                                     {% endif %}
                                 {% endfor %}

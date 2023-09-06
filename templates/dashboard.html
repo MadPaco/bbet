@@ -1,30 +1,57 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container mt-5">
 
     {% if has_placed_bets_for_all_matches %}
-        <p>All bets placed. Good luck.</p>
+        <div class="alert alert-success">
+            <p>All bets placed. Good luck.</p>
+        </div>
     {% else %}
-        <h2 class="" style="color: red;">You haven't placed bets for all matches this week. Make sure to complete them!</h2>
+        <div class="alert alert-danger">
+            <h4>You haven't placed bets for all matches this week. Make sure to complete them!</h4>
+        </div>
     {% endif %}
-    
-    <!-- User Stats -->
-    <div class="card mb-4">
-        <div class="card-header">Your Stats</div>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item"><strong>Total Points:</strong> {{ total_points }}</li>
-            <li class="list-group-item"><strong>Current Ranking:</strong> {{ user_rank }}</li>
-            <li class="list-group-item"><strong>Best Week:</strong> Week {{ best_week.number }} with {{ best_week.points }} points</li>
-        </ul>
+
+    <div class="row">
+
+        <!-- User Stats -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">Your Stats</div>
+                <ul class="list-group list-group-flush text-center">
+                    <li class="list-group-item"><strong>Total Points:</strong> {{ total_points }}</li>
+                    <li class="list-group-item"><strong>Current Ranking:</strong> {{ user_rank }}</li>
+                    <li class="list-group-item"><strong>Best Week:</strong> Week {{ best_week.number }} with {{ best_week.points }} points</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Latest Achievement -->
+        <div class="col-lg-6 mb-4">
+            {% if latest_achievement %}
+            <div class="card shadow text-center">
+                <div class="card-header bg-info text-white">Latest Achievement</div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ latest_achievement.achievement.name }}</h5>
+                    <p class="card-text">{{ latest_achievement.achievement.description }}</p>
+                    {% if latest_achievement.achievement.image %}
+                        <img src="{% static '/images/achievements/'|add:latest_achievement.achievement.image %}" alt="{{ latest_achievement.achievement.name }} icon" class="card-img-top mb-2 d-block mx-auto" style="max-height: 100px; object-fit: contain;">
+                    {% endif %}
+                    <p class="text-muted">Achieved on: {{ latest_achievement.date_achieved|date:"F j, Y, g:i a" }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
     </div>
-    
+
     <!-- Upcoming Matches -->
-    <div class="card mb-4">
-        <div class="card-header">Upcoming Matches</div>
+    <div class="card mb-4 shadow">
+        <div class="card-header bg-success text-white">Upcoming Matches</div>
         <ul class="list-group list-group-flush">
             {% for match in upcoming_matches %}
-                <li class="list-group-item">{{ match.away_team }} at {{ match.home_team }} - {{match.date}} </li>
+                <li class="list-group-item">{{ match.away_team }} at {{ match.home_team }} - {{ match.date|date:"F j, Y" }}</li>
             {% endfor %}
         </ul>
     </div>

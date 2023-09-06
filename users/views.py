@@ -72,9 +72,6 @@ class PredictionsView(View):
             'current_time': timezone.now(),
         }
 
-        for game in games:
-            game.match.timestamp = int(game.match.date.timestamp())
-
         return render(request, self.template_name, context)
 
     def post(self, request, *args, **kwargs):
@@ -95,6 +92,7 @@ class PredictionsView(View):
             predicted_away_score = request.POST.get(away_score_key)
             old_home_score = game.predicted_home_score
             old_away_score = game.predicted_away_score
+            game.timestamp = current_time
 
             if predicted_home_score is not None and predicted_away_score is not None:
                 if old_home_score != int(predicted_home_score) or old_away_score != int(predicted_away_score):
@@ -206,10 +204,14 @@ class EnterResultsView(UserPassesTestMixin, ListView):
                         self.award_achievement(bet.user, "Brave Soul")
 
                     # "last minute luck"
-                    time_difference = match.date - bet.timestamp  # Assuming match.start_time is a DateTime field.
-                    if time_difference.total_seconds() <= 60:  # 1 minute = 60 seconds
-                        if bet.points > 0: 
-                            self.award_achievement(bet.user, "Last Minute Luck")
+                    if bet.timestamp:
+                        time_difference = match.date - bet.timestamp  # Assuming match.start_time is a DateTime field.
+                        if time_difference.total_seconds() <= 60:  # 1 minute = 60 seconds
+                            if bet.points > 0: 
+                                self.award_achievement(bet.user, "Last Minute Luck")
+                    else:
+                        pass
+
 
         # Checks outside the match loop, that concern user's overall performance:
         # Note: These checks might need optimization for performance reasons.
@@ -449,5 +451,10 @@ class DashboardView(TemplateView):
                 'number': None,
                 'points': None
             }
+
+        # Fetch the latest achievement
+        latest_achievement = UserAchievement.objects.filter(user=self.request.user).order_by('-date_achieved').first()
+        context['latest_achievement'] = latest_achievement
             
         return context
+    
